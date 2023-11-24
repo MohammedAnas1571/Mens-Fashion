@@ -1,0 +1,244 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navBar') %>
+<div class="container">
+    <div class="shadow p-3 mb-5 bg-body rounded text-center">
+        <br>
+        <h3 class="text-black">My Wallet</h3>
+        <br>
+    </div>
+    &nbsp;    <a href="/profile" >Go Back</a>
+    <div class="row">
+        <div class="container d-flex justify-content-center mt-5">
+
+            <div class="card">
+
+                <div class="top-container">
+
+                   
+                            <div class="ml-3">
+                                <h3 class="name">
+                                    <%= user.userName %>
+                                </h3>
+                                <br>
+                             
+                                <h5 class="mail">
+                                    <%= user.email %>
+                                </h5>
+                            </div>
+                            <hr>
+                
+                                <br>
+                                <br>
+                                <br>
+
+
+                                <!-- Default image or alternative content -->
+                               
+
+                             
+
+
+                </div>
+
+
+                <div class="middle-container d-flex justify-content-between align-items-center mt-3 p-2">
+                    <div class="dollar-div px-3">
+
+                        <div class="round-div"><i class="fa">&#8377;</i>
+                        </i>
+                        </div>
+
+                    </div>
+                    <div class="d-flex flex-column text-right mr-2">
+                        <span class="current-balance">Current Balance</span>
+                        <span class="amount"><span class="dollar-sign">₹</span>
+                           <%= user.wallet %>
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="recent-border mt-4">
+                    <span class="recent-orders">Wallet history</span>
+                </div>
+                <div class="middle-container d-flex justify-content-between align-items-center mt-3 p-2">
+
+                    <div class="transaction-history">
+                        <table class="table">
+                            <tbody>
+                                <% user.walletHistory.forEach((element, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %>.</td>
+                                        <td><%= element.date.toLocaleDateString() %></td>
+                                        <td><span class="text-primary">Amount: <%= element.amount %></span></td>
+                                        <td><%= element.message %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+
+<%- include('../partials/user/footer') %>
+
+
+
+
+
+    <style>
+  /* CSS */
+/* CSS */
+a {
+  text-decoration: none; /* Removes underline */
+  color: blue; /* Sets the default text color to blue */
+}
+
+a:hover {
+  text-decoration: none; /* Ensures no underline on hover */
+  color: blue; /* Retains the default text color on hover */
+}
+
+
+        .card {
+            background-color: #fff;
+            width: 780px;
+            border-radius: 33px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            padding: 2rem !important;
+        }
+
+        .top-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-image {
+            border-radius: 10px;
+            border: 2px solid #5957f9;
+        }
+
+        .name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #272727;
+            position: relative;
+            top: 8px;
+        }
+
+        .mail {
+            font-size: 14px;
+            color: grey;
+            position: relative;
+            top: 2px;
+        }
+
+        .middle-container {
+            background-color: #eee;
+            border-radius: 12px;
+
+        }
+
+        .middle-container:hover {
+            border: 1px solid #5957f9;
+        }
+
+        .dollar-div {
+            background-color: #5957f9;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .round-div {
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .dollar {
+            font-size: 16px !important;
+            color: #5957f9 !important;
+            font-weight: bold !important;
+        }
+
+
+        .current-balance {
+            font-size: 15px;
+            color: #272727;
+            font-weight: bold;
+        }
+
+        .amount {
+            color: #5957f9;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .dollar-sign {
+            font-size: 16px;
+            color: #272727;
+            font-weight: bold;
+        }
+
+        .recent-border {
+            border-left: 2px solid #5957f9;
+            display: flex;
+            align-items: center;
+
+        }
+
+        .recent-border:hover {
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+
+        .recent-orders {
+            font-size: 16px;
+            font-weight: 700;
+            color: #5957f9;
+            margin-left: 2px;
+        }
+
+        .wishlist {
+            font-size: 16px;
+            font-weight: 700;
+            color: #272727;
+
+        }
+
+        .wishlist-border:hover {
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+
+        .fashion-studio {
+            font-size: 16px;
+            font-weight: 700;
+            color: #272727;
+        }
+
+        .fashion-studio-border:hover {
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+    </style>

@@ -1,0 +1,57 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+
+<section class="gradient-custom">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card border-0 rounded">
+          <div class="card-header bg-white text-center py-5">
+            <h1 class="fw-bold mb-0" style="font-size: 30px;">Thank you for your Order, <span style="color: #0fc5dd;"><%= user.userName %></span>!</h1>
+          </div>
+          <div class="card-body p-4">
+            <% order.products.forEach(elements => { %>
+              <div class="row mb-4">
+                <div class="col-md-2">
+                  <img height="150" width="250" src="data:<%= elements.product.images[0].contentType %>;base64,<%= elements.product.images[0].data.toString('base64') %>" alt="">
+                </div>
+                <div class="col-md-4 text-center d-flex justify-content-center align-items-center">
+                  <p class="mb-0"> <%= elements.product.product_name %></p>
+                </div>
+                <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
+                  <p class="mb-0">Color: <%= elements.product.color %></p>
+                </div>
+                <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
+                  <p class="mb-0">Price: ₹<%= elements.product.price %></p>
+                </div>
+                <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
+                  <p class="mb-0">Qty: <%= elements.quantity %></p>
+                </div>
+              </div>
+            <% }) %>
+
+            <hr class="mb-4" style="background-color: #e0e0e0; opacity: 1;">
+
+            <div class="d-flex justify-content-between mb-3">
+              <div class="continue__btn"style="text-center;">
+                <a href="/shop/1">Continue Shopping</a>
+            </div>
+              <p class="fw-bold"><span class="fw-bold me-4">Total</span>₹<%= order.totalPrice %></p>
+            </div>
+           
+            <div class="continue__btn "style="text-center;">
+              <a href="/invoice/<%= order._id %>">Download Invoice</a>
+          </div>
+             
+        
+
+   
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/user/footer") %>

@@ -1,0 +1,235 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<section class=" gradient-custom pb-5">
+  <div class="container py-5">
+    <% if(typeof message !=='undefined' ){ %>
+    <div class="alert alert-danger " style="font-size :20px">
+      <%= message %>
+    </div>
+    <% } %>
+    <div class="row d-flex justify-content-center  ">
+      <div class="col-lg-10 col-xl-8">
+        <div class="card" style="border-radius: 10px;">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between  mb-4">
+              <p class="lead fw-normal mb-0" style="color: #a8729a;">Order History</p>
+            </div>
+
+            <% order.forEach(item=> { %>
+            <div class="card shadow-0 border mb-4">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <p><strong>_id:</strong>
+                      <%= item._id %>
+                    </p>
+                    <p><strong>Order ID:</strong>
+                      <%= item.orderId %>
+                    </p>
+                    <p><strong>Customer:</strong>
+                      <%= item.deliveryAddress.userName %>
+                    </p>
+                    <p class="text-primary"><strong class="text-dark">Status:</strong>
+                      <span id="status-<%= item._id %>">
+                        <%= item.status %>
+                      </span>
+                    </p>
+                    <p><strong>Total Price:</strong>
+                      <%= item.totalPrice %>
+                    </p>
+                    <p><strong>Delivery Address:</strong>
+                      <%=item.deliveryAddress.line1 %>, <%= item.deliveryAddress.place %>, <%=
+                                      item.deliveryAddress.district %>, <%= item.deliveryAddress.state %>, <%=
+                                          item.deliveryAddress.country %>, <%= item.deliveryAddress.postcode %>
+                    </p>
+                    <p class="text-primary"><strong class="text-dark">Payment Method:</strong>
+                      <%= item.paymentMethod %>
+                    </p>
+                    <p class="text-primary"><strong class="text-dark">Payment Status:</strong>
+                      <%= item.paymentStatus %>
+                    </p>
+                    <p><strong>Order Date:</strong>
+                      <%= item.orderDate %>
+                    </p>
+                  </div>
+                </div>
+
+                <% if (item.status === "Cancelled") { %>
+                <button class="btn btn-danger btn-sm float-end"> Item Canceled</button>
+                <% } else if (item.status === "Returned") { %>
+                <button class="btn btn-danger btn-sm float-end"> Item Returned</button>
+                <% } else if (item.status === "Delivered") { %>
+                <div id="return-exceeded-<%= item._id %>" style="display: none;">
+                  Return date has been exceeded!
+                </div>
+                <div id="return-<%= item._id %>">
+                  <button class="btn btn-danger btn-sm float-end" onclick="returnOrder('<%= item._id %>', '<%= item.deliveryAt %>')">Return
+                  </button>
+                </div>
+                <% } else { %>
+                <div id="cancel-<%= item._id %>">
+                  <button class="btn btn-danger btn-sm float-end" onclick="cancelOrder('<%= item._id %>')">Cancel
+                  </button>
+                </div>
+                <% } %>
+              </div>
+            </div>
+
+            <% }) %>
+            <!-- Close the forEach loop here -->
+
+          </div>
+        </div>
+        <!-- pagination -->
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="product__pagination">
+              <% if (currentPage > 1) { %>
+              <a href="/myOrder/<%= currentPage - 1 %>">&lt;</a>
+              <% } %>
+              <% for (let i=1; i <= totalPages; i++) { %>
+              <a href="/myOrder/<%= i %>">
+                <%= i %>
+              </a>
+              <% } %>
+              <% if (currentPage < totalPages) { %>
+              <a href="/myOrder/<%= currentPage + 1 %>">&gt;</a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<script>
+  function cancelOrder(orderId) {
+
+    const canCancelOrder = true; // Replace this with your actual condition check
+
+    if (canCancelOrder) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Provide a reason for cancellation:',
+        input: 'text', // Use input field for reason
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: "Cancel Order",
+        cancelButtonText: "Close",
+      }).then((result) => {
+
+        if (result.isConfirmed && result.value) {
+          console.log("dhrjheilbg");
+          const cancelReason = result.value;
+          fetch(`/cancelOrder/${orderId}`, {
+
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                reason: cancelReason
+              }) // Send cancellation reason in the request body
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log(data); // Handle the successful cancellation response
+              // Update UI as needed
+              Swal.fire('Canceled!', 'The order has been canceled and amount will credited to your wallet', 'success').then(() => {
+
+                if (data.status === 'cancelled') {
+                  // Update UI if the order has been successfully cancelled
+                  document.getElementById(`cancel-${orderId}`).innerHTML = '<button class="btn btn-danger btn-sm float-end">Item Canceled</button>';
+                  document.getElementById(`status-${orderId}`).innerText = "Cancelled";
+                } else {
+                  document.getElementById(`cancel-${orderId}`).innerHTML = '<button class="btn btn-danger btn-sm float-end">Item Canceled</button>';
+                  document.getElementById(`status-${orderId}`).innerText = "Cancelled";
+                }
+                // Optionally, reload the page or update the UI as needed
+              });
+            })
+            .catch(error => {
+              console.error('There has been a problem with your fetch operation:', error);
+              Swal.fire('Oops...', 'Something went wrong!', 'error');
+            });
+        }
+      });
+    } else {
+      // Handle case where order cannot be canceled
+      Swal.fire('Cannot cancel order', 'Add your specific message for why the order cannot be canceled.', 'warning');
+    }
+  }
+
+
+  function returnOrder(orderId, deliveryDate) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Provide a reason for return:',
+      input: 'text',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Return Product',
+      cancelButtonText: 'Close'
+
+    }).then((result) => {
+      console.log("sjdkhfkrsj");
+      if (result.isConfirmed && result.value) {
+        const returnReason = result.value;
+
+        // Convert deliveryDate to a Date object
+        const currentDate = new Date();
+        const daysDifference = Math.floor((currentDate - new Date(deliveryDate)) / (1000 * 60 * 60 * 24));
+
+        if (daysDifference > 4) {
+          // Return date has been exceeded, hide the return button and show a message
+          document.getElementById(`return-${orderId}`).style.display = 'none';
+          document.getElementById(`return-exceeded-${orderId}`).style.display = 'block';
+        } else {
+          // Proceed with the return process
+          fetch(`/returnOrder/${orderId}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                reason: returnReason
+              })
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log(data);
+              // Update UI as needed
+              Swal.fire('Returned!', 'The order has been returned amount will credited to your wallet', 'success').then((result) => {
+                if (result.isConfirmed) {
+                  document.getElementById(`return-${orderId}`).innerHTML = `<button class="btn btn-danger btn-sm float-end" > Item returned</button>`;
+                  document.getElementById(`status-${orderId}`).innerText = "returned";
+                }
+              });
+            })
+            .catch(error => {
+              console.error('There has been a problem with your fetch operation:', "error");
+              Swal.fire('Oops...', 'Something went wrong!', 'error');
+            });
+        }
+      }
+    });
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<%- include("../partials/user/footer") %>

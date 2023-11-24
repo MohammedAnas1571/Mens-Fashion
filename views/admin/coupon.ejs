@@ -1,0 +1,100 @@
+<%- include('../partials/admin/header') %>
+<style>
+.card-body {
+    max-height: 400px; /* Set a maximum height for the details section */
+    overflow-y: auto; /* Add a vertical scrollbar when content overflows */
+}
+
+
+</style>
+
+
+  <div class="container-scroller">
+    <!-- Sidebar -->
+   
+      <!-- Main Content -->
+      <div class="container-fluid page-body-wrapper">
+ 
+          <div class="main-panel" style="width:80vw;">
+            <div class="content-wrapper">
+              <ul class="navbar-nav w-100">
+                <li class="nav-item w-100">
+                  <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
+                    <input type="text" class="form-control" placeholder="Search products">
+                  </form>
+                </li>
+              </ul>
+              <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="d-flex flex-row justify-content-between">
+                        <h4 class="card-title">All Coupons</h4>
+                        <a href="/admin/addcoupon">Add Coupon</a>
+                      </div>
+                      <div class="table-responsive">
+                        <% if (allCoupon.length) { %>
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th>NO</th>
+                                <th>Coupon Name</th>
+                                <th>Description</th>
+                                <th>Minimum Purchase <br> Amount</th>
+                                <th>Expiry Date</th>
+                                <th>Discount Amount / <br> Percentage %</th>
+                                <th>Code</th>
+                                <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% allCoupon.forEach((coupon,i)=> { %>
+                                <tr>
+                                  <td>
+                                    <%= i+1 %>
+                                  </td>
+                                  <td>
+                                    <%= coupon.coupon_name %>
+                                  </td>
+                                  <td>
+                                    <% const words=coupon.description.split(' ');
+                            for (let i = 0; i < words.length; i++) {
+                                if (i % 5 === 0 && i !== 0) { %>
+                                    <br> <br>
+                                    <%   }   %>
+                                  <%= words[i] %><% // Display each word
+                            }
+                            %>
+                          </td>
+                          <td><%= coupon.minimumPurchaseAmount %></td>
+                          <td><%= coupon.expaire_date.toLocaleDateString() %></td>
+                          <td><%= coupon.discount_amount_or_percentage %> <%= coupon.discount_type === 'Percentage' ? '%' : ' ₹' %></td>
+
+                          <td><%= coupon.code %></td>
+                          <td>
+                            <% if (coupon.coupon_done === true) { %>
+                                <a href="/admin/coupon/<%= coupon._id %>/Active" class="btn btn-info">Active</a>
+                                <a href="/admin/coupon/<%= coupon._id %>/Edit-coupon" class="btn btn-primary">Edit</a>
+                            <% } else { %>
+                                <a href="/admin/coupon/<%= coupon._id %>/Delete" class="btn btn-danger">Delete</a>
+                                <a href="/admin/coupon/<%= coupon._id %>/Edit-coupon" class="btn btn-primary">Edit</a>
+                             <% } %>
+
+                         
+                          </td>
+                        </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                    <% } else { %>
+                    <p>No Coupons Created</p>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

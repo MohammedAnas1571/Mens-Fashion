@@ -1,0 +1,241 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <h4>Shop</h4>
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <span>Shop</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="shop spad">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3">
+        <div class="shop__sidebar">
+          <!-- <div class="shop__sidebar__search">
+                                
+                                    <input type="text" placeholder="Search...">
+                                    <button  onclick="search()"type="submit"><span class="icon_search"></span></button>
+                                
+                            </div> -->
+          <div class="shop__sidebar__accordion">
+            <div class="accordion" id="accordionExample">
+              <div class="card">
+                <div class="card-heading">
+                  <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
+                </div>
+                <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                  <div class="card-body">
+                    <div class="shop__sidebar__categories">
+                      <ul class="nice-scroll">
+                        <% catagory.forEach(item  => { %>
+                        <li><a href="#"><%= item.categoryName %> </a></li>
+                        <%  }) %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-heading">
+                  <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
+                </div>
+                <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
+                  <div class="card-body">
+                    <div class="shop__sidebar__brand">
+                      <ul>
+                        <% products.forEach(item  => { %>
+
+                        <li><a href="#"><%= item.brand_name %></a></li>
+                        <%  }) %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-9 mt-0">
+        
+        <div class="row">
+
+
+
+          <% if (products.length)  { %>
+          <% products.forEach((product,index) =>{ %>
+
+          <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="product__item sale">
+              <div class="product__item__pic set-bg">
+                <a href="/shopdetails/<%= product._id %>/details">
+                  <% if (product.offer > 0) { %>
+                  <div class="ribbon"><span> Flat <%= product.offer %>%</span></div>
+                  <% } %>
+                  <img src="data:<%= product.images[0].contentType %>;base64,<%= product.images[0].data.toString('base64') %>" alt="">
+                  <% if (index < 3) { %>
+                  <span class="label">New</span>
+                  <% } %>
+                  <ul class="product__hover">
+
+                    <br><br><br><br><br>
+                    <li><a href="#"><img src="/user/img/icon/heart.png" alt=""></a></li>
+
+                  </ul>
+              </div>
+              <div class="product__item__text">
+                <h5 class="fw-bold">
+                  <%=product.product_name%>
+                </h5>
+
+
+                <div class="rating">
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star-o"></i>
+                </div>
+                <h5> &#8377;<%= product.price %>
+                </h5>
+                <div class="product__color__select">
+                  <label for="pc-7">
+                    <input type="radio" id="pc-7">
+                  </label>
+                  <label class="active black" for="pc-8">
+                    <input type="radio" id="pc-8">
+                  </label>
+                  <label class="grey" for="pc-9">
+                    <input type="radio" id="pc-9">
+                  </label>
+
+
+                </div>
+                <br>
+                <div class="flash-message" id="flash-message">
+                  Item added to cart!
+                </div>
+
+              </div>
+              <% if (product.stock > 0) { %>
+              <a onclick="addCart('<%= product._id %>')" class="btn btn-success btn-lg" style="border-radius: 16px;">Add To Cart</a>
+              <% } else { %>
+              <p style="color: red; font-weight: bold;">Out of Stock</p>
+              <% } %>
+            </div>
+
+          </div>
+          <% }) %>
+          <% } else{ %>
+          <br>
+          <h2>Not Found</h2>
+          <% } %>
+        </div>
+
+
+        <!-- pagination -->
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="product__pagination">
+              <% if (currentPage > 1) { %>
+              <a href="/shop/<%= currentPage - 1 %>">&lt;</a>
+              <% } %>
+              <% for (let i=1; i <= totalPages; i++) { %>
+              <a href="/shop/<%= i %>">
+                <%= i %>
+              </a>
+              <% } %>
+              <% if (currentPage < totalPages) { %>
+              <a href="/shop/<%= currentPage + 1 %>">&gt;</a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Shop Section End -->
+
+<script>
+  const flashMessage = document.getElementById('flash-message');
+
+  function addCart(id) {
+
+
+    fetch(`/cart/${id}/passdata`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+      })
+      // ...
+
+      .then(response => {
+        // Check if the request was successful
+        if (!response.ok) {
+
+          throw new Error(response.status === 400 ? 'Insufficient stock.' : 'Network response was not ok');
+        }
+        // Parse the JSON data from the response
+        return response.json();
+      })
+      .then(data => {
+        const cartUpadte = document.getElementById("cartItem");
+
+        console.log("RESSSSSSSSSSSSSS");
+        flashMessage.textContent = 'Item added to cart!';
+        flashMessage.style.display = 'block'; // Show the flash message
+        setTimeout(() => {
+          flashMessage.style.display = 'none'; // Hide the flash message after a certain duration (in milliseconds)
+        }, 2000); // 2000ms (2 seconds) in this example, adjust as needed
+        console.log(data);
+        cartUpadte.innerHTML = data || 0;
+      })
+     .catch(error => {
+  console.log(error.message);
+
+  // Show SweetAlert with different messages based on error type
+  if (error.message.includes('Insufficient stock.')) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Insufficient stock.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
+  } else {
+    Swal.fire({
+      title: 'Error',
+      text: 'Please log in to your account.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
+  }
+});
+
+
+
+    }
+ 
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+<%- include("../partials/user/footer") %>

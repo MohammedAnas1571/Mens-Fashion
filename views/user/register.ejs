@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <style>
+   /* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+  </style>
+</head>
+
+<body>
+  <section class="vp-100" style="background-color: #fffefe;">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-xl-10">
+          <div class="card" style="border-radius: 1rem;">
+            <div class="row g-0">
+              <div class="col-md-6 col-lg-5 d-none d-md-block">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img1.webp" alt="login form" class="img-fluid w-100" style="border-radius: 1rem 0 0 1rem;" />
+              </div>
+              <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                <div class="card-body p-4 p-lg-9 text-black">
+
+                  <% if(typeof message !=='undefined' ){ %>
+                  <div class="alert alert-danger " id="alert-container" style="font-size :20px">
+                    <%= message %>
+                  </div>
+                  <% } %>
+
+
+
+
+
+                  <form id="registrationForm" action="/register" method="post" >
+
+                    <div class="d-flex align-items-center mb-3 ">
+                      <i class="fas fa-cubes fa-2x me-3" style="color: #383230;"></i>
+                      <span class="h1 fw-bold mb-0"></span>
+                    </div>
+
+                    <h3 class="fw-normal mb-3 fw-bold" style="letter-spacing: 1px;"> Create Account</h3>
+                    <div class="form-outline mb-3 ">
+                      <label class="form-label fw-bold" for="form2Example17"> UserName </label>
+                      <input type="text" id="userName" class="form-control form-control-lg" name="userName" required>
+                      <div id="nameError" style="color: red;"></div>
+                    </div>
+                    <div class="form-outline mb-3 ">
+                      <label class="form-label fw-bold" for="form2Example17">Email address</label>
+                      <input type="email" id="email" class="form-control form-control-lg" name="email" required>
+                      <div id="emailError" style="color: red;"></div>
+                    </div>
+
+                    <div class="form-outline mb-3">
+                      <label class="form-label fw-bold" for="mobile">Mobile number</label>
+                      <input type="number" id="mobile" class="form-control form-control-lg" name="mobile" required minlength="10" maxlength="10">
+                      <div id="numberError" style="color: red;"></div>
+                    </div>
+
+
+
+                    <div class="form-outline mb-3 ">
+                      <label class="form-label fw-bold" for="form2Example27">Password</label>
+                      <div class="input-group">
+                        <input type="password" id="password" class="form-control form-control-lg" name="password" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                      </div>
+
+                      <div id="passwordError" style="color: red;"></div>
+
+
+                    </div>
+                    <div class="form-outline mb-3 ">
+                      <label class="form-label fw-bold" for="form2Example17">Confirm Password</label>
+
+                      <input type="password" id="confirmpassword" class="form-control form-control-lg" name="confirmPassword" required>
+
+                      <div id="repasswordError" style="color: red;"></div>
+
+
+                    </div>
+
+
+                    <div class="pt-3 ">
+                      <button class="btn btn-info btn-lg w-100 " type="submit">Register</button>
+                    </div>
+
+                    <br>
+                    <p class="mb-5 fw-bold pb-lg-2" style="color: #091ceb;">Already have account ? <a href="/login" class="fw-bold" style="color: #081cfa;">Sign in </a></p>
+
+                  </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+
+  <script>
+    const couponForm = document.getElementById("registrationForm");
+    const nameInput = document.getElementById("userName");
+    const nameError = document.getElementById("nameError");
+
+    const emailInput = document.getElementById("email");
+    const emailError = document.getElementById("emailError");
+
+    const mobileInput = document.getElementById("mobile");
+    const numberError = document.getElementById("numberError");
+
+    const passwordInput = document.getElementById("password");
+    const passwordError = document.getElementById("passwordError");
+
+    const repasswordInput = document.getElementById("confirmpassword");
+    const repasswordError = document.getElementById("repasswordError");
+
+    const togglePasswordButton = document.getElementById("togglePassword");
+       setTimeout(function () {
+      let alertContainer = document.getElementById('alert-container');
+      if (alertContainer) {
+        alertContainer.style.display = 'none';
+      }
+    }, 4000);
+
+    function togglePasswordVisibility() {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+    }
+
+    togglePasswordButton.addEventListener("click", togglePasswordVisibility);
+
+    function emailValidation() {
+      if (emailInput.value.trim() === "") {
+        emailError.innerHTML = "Please enter your Email Address!";
+        return false;
+      } else if (!(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailInput.value))) {
+        emailError.innerHTML = "Please enter a valid Email address.";
+        return false;
+      } else {
+        emailError.innerHTML = "";
+        return true;
+      }
+    }
+
+
+    function nameValidation() {
+      const nameRegex = /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/;
+
+      if (nameInput.value.trim() === "") {
+        nameError.innerHTML = "Please enter your Name!";
+        return false;
+      } else if (!nameRegex.test(nameInput.value)) {
+        nameError.innerHTML = "Please enter a valid Name.";
+        return false;
+      } else {
+        nameError.innerHTML = "";
+        return true;
+      }
+    }
+
+    function mobileValidate() {
+      const mobileRegex = /^(?!0{5})[1-9][0-9]{9}$/;
+      if (mobileInput.value.trim() === "") {
+        numberError.innerHTML = "Please enter your Mobile Number!";
+        return false;
+      } else if (!mobileRegex.test(mobileInput.value)) {
+        numberError.innerHTML = "Please enter a valid Mobile Number.";
+        return false;
+      } else {
+        numberError.innerHTML = "";
+        return true;
+      }
+    }
+
+
+    function passwordValidation() {
+      if (passwordInput.value.trim() === "" || passwordInput.value.length < 8) {
+        passwordError.innerHTML = "Please Enter Password with a minimum length of 8 characters!";
+        return false;
+      } else if (!(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/.test(passwordInput.value))) {
+        passwordError.innerHTML = "Password includes uppercase, lowercase, numbers, and symbols!";
+        return false;
+      } else {
+        passwordError.innerHTML = "";
+        return true;
+      }
+    }
+
+    function confirmPassword() {
+      if (repasswordInput.value.trim() === "") {
+        repasswordError.innerHTML = "Please confirm your password.";
+        return false;
+      } else if (repasswordInput.value !== passwordInput.value) {
+        repasswordError.innerHTML = "Passwords do not match!";
+        return false;
+      } else {
+        repasswordError.innerHTML = "";
+        return true;
+      }
+    }
+
+    couponForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      const validations = [
+        nameValidation(),
+        emailValidation(),
+        mobileValidate(),
+        passwordValidation(),
+        confirmPassword(),
+       
+        // Add this line
+      ];
+      const hasErrors = validations.some(validation => validation === false);
+      if (!hasErrors) {
+        couponForm.submit(); // Trigger the form submission
+      }
+    });
+  </script>
+
+</body>
+
+</html>

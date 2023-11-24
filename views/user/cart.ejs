@@ -1,0 +1,182 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+
+<% if(typeof message !=='undefined' ){ %>
+<div class="alert alert-danger " style="font-size :20px">
+  <%= message %>
+</div>
+<% } %>
+<div id="err">
+
+</div>
+
+<!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+
+        <div class="shopping__cart__table">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+
+                <th>Offer</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <% cart.forEach(c=>{ %>
+              <tr id="<%= c.product._id %>">
+                <td class="product__cart__item ">
+
+                  <div class="product__cart__item__pic">
+                    <img height="64" src="data:<%= c.product.images[0].contentType %>;base64,<%= c.product.images[0].data.toString('base64') %>" alt="">
+                  </div>
+                  <div class="product__cart__item__text">
+                    <h6>
+                      <%= c.product.product_name %>
+                    </h6>
+                    <h5>&#8377; <%= c.product.price %>
+                    </h5>
+                  </div>
+                </td>
+                <td class="quantity__item">
+                  <div class="input-group mb-3" style="max-width: 120px;">
+                    <div class="input-group-prepend">
+                      <button class="btn btn-outline-dark" type="button" onclick="updateCartItem('<%= c.product._id %>', 'decrement')">&minus;</button>
+                    </div>
+                    <input type="text" class="form-control text-center" value="<%= c.quantity %>" id="quantityElement_<%= c.product._id %>" aria-label="Example text with button addon" aria-describedby="button-addon1" readonly>
+                    <div class="input-group-append">
+                      <button class="btn btn-outline-dark" type="button" onclick="updateCartItem('<%= c.product._id %>', 'increment')">&plus;</button>
+                    </div>
+                  </div>
+                </td>
+                <td class="cart__price" id="offer<%= c.product._id %>">
+                  <% if (c.product.offer > 0) { %>
+                  <%= c.product.offer %>&percnt;
+                  <% } else { %>
+                  &nbsp; &nbsp; -
+                  <% } %>
+                </td>
+
+                <td class="cart__price" id="totalPrice_<%= c.product._id %>">
+                  &#8377; <%= c.totalAmount %>
+                </td>
+
+                <p style="display: none;" id="stock<%= c.product._id %>">
+                  outof stock
+                </p>
+
+                <td class="cart__close"><a onclick="deleteCart('<%= c.product._id %>')"><i class="fa fa-close"></i></a></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="continue__btn">
+              <a href="/shop/1">Continue Shopping</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="col-lg-4">
+
+        <div class="cart__total">
+          <h6>Cart total</h6>
+          <ul>
+            <li>Subtotal <span id="subTotalPrice">&#8377; <%= grandTotal %></span></li>
+            <li>Total <span id="totalPrice">&#8377; <%=grandTotal%></span></li>
+          </ul>
+          <% if(cart.length){ %>
+          <a href="/checkout" id="button" class="primary-btn" style="font-size:10px;">Proceed to checkout</a>
+
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // update cart
+  function updateCartItem(cartItemId, incOrDec) {
+  const data = {
+    type: incOrDec
+  };
+
+  $.ajax({
+    url: `/update-cart/${cartItemId}`,
+    type: 'POST',
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    success: function(response) {
+      console.log(response);
+
+      $('#totalPrice_' + cartItemId).text('₹' + response.totalPrice.toFixed(2));
+      $('#subTotalPrice').text('₹' + response.grandTotal.toFixed(2));
+      $('#totalPrice').text('₹' + response.grandTotal.toFixed(2));
+      $('#quantityElement_' + cartItemId).val(response.quantity);
+    },
+    error: function(xhr, status, error) {
+      console.log(status);
+      if (xhr.status === 400) {
+        // Use SweetAlert for a more visually appealing alert
+        Swal.fire({
+          icon: 'error',
+          title: 'Insufficient stock !',
+          text: 'Insufficient stock for this product.'
+
+        });
+        return; // Stop further execution since stock is insufficient
+      }
+    }
+  });
+}
+
+
+
+  function deleteCart(id) {
+    fetch(`/deletecart/${id}`, {
+      method: "POST"
+    }).then(res => {
+      if (res.status === 200) {
+        console.log("Successfully deleted item from cart");
+        return res.json(); // Parse the response body as JSON
+      } else {
+        console.log('Error deleting item from cart');
+        throw new Error('Failed to delete item from cart');
+      }
+    }).then(response => {
+      console.log(response);
+      const cartUpadte = document.getElementById("cartItem");
+      document.getElementById(id).remove()
+      // Update the HTML elements with the new grandTotal valu
+      document.getElementById('subTotalPrice').textContent = '₹' + response.grandTotal.toFixed(2);
+      document.getElementById('totalPrice').textContent = '₹' + response.grandTotal.toFixed(2);
+      cartUpadte.innerHTML = response.cart || 0;
+
+      if (response.cartLength === 0) {
+
+        document.getElementById('button').remove()
+        document.getElementById("err").innerHTML = ` <div class="alert alert-danger " style="font-size :20px">
+                Cart is empty pls add items </div>`
+      }
+
+
+    }).catch(error => {
+      console.error(error);
+    });
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Shopping Cart Section End -->
+<%- include("../partials/user/footer") %>

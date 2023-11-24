@@ -1,0 +1,165 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+
+<style media="screen">
+  .product__details__pic__item {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.5s;
+    /* Add a smooth transition effect */
+  }
+
+  .product__details__pic__item img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>
+
+<!-- Shop Details Section Begin -->
+<section class="shop-details">
+  <div class="product__details__pic">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="product__details__breadcrumb">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <span>Product Details</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-3 col-md-3">
+          <ul class="nav nav-tabs" style="height: 575px;" role="tablist">
+            <% product.images.forEach((image, i)=> { %>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#tabs-<%= i + 1 %>" role="tab">
+                <div class="product__thumb__pic set-bg">
+                  <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="">
+                </div>
+              </a>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+
+        <div class="col-lg-6 col-md-9">
+          <div class="tab-content">
+            <!-- Data -->
+            <% product.images.forEach((image, i) => { %>
+            <div class="tab-pane <%= i === 0 ? 'active' : '' %>" id="tabs-<%= i + 1 %>" role="tabpanel">
+              <div class="product__details__pic__item" data="ProductImage-<%= i + 1 %>" onmouseenter="startZoom(event, 'ProductImage-<%= i + 1 %>')" onmouseleave="stopZoom('ProductImage-<%= i + 1 %>')">
+                <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="">
+              </div>
+            </div>
+            <% }) %>
+          </div>
+
+
+
+
+          <div class="flash-message" id="flash-message">
+            Item added to cart!
+          </div>
+
+
+
+
+
+        </div>
+      </div>
+    </div>
+    <div class="product__details__content">
+      <div class="container">
+        <div class="row d-flex justify-content-center">
+          <div class="col-lg-8">
+            <div class="product__details__text">
+              <h2>
+                <%= product.product_name %>
+              </h2>
+              <br>
+              <h3> ₹ <%= product.price %> <span>5000</span></h3>
+              <p class="note">
+                <%= product.description %>
+              </p>
+
+
+            </div>
+            <div style="display: flex; justify-content: center; align-items: center;">
+              <div class="product__details__cart__option">
+                <a onclick="addCart('<%= product._id %>')" class="primary-btn">add to cart</a>
+              </div>
+              <div class="product__details__btns__option mx-4">
+                <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  function addCart(id) {
+    const flashMessage = document.getElementById('flash-message');
+
+
+    fetch(`/cart/${id}/passdata`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+      })
+      .then(response => {
+        // Check if the request was successful
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        // Parse the JSON data from the response
+        return response.json();
+      })
+      .then(data => {
+                  
+                  console.log("RESSSSSSSSSSSSSS");
+                   flashMessage.textContent = 'Item added to cart!';
+                   flashMessage.style.display = 'block'; // Show the flash message
+                   setTimeout(() => {
+                       flashMessage.style.display = 'none'; // Hide the flash message after a certain duration (in milliseconds)
+                   }, 2000); // 2000ms (2 seconds) in this example, adjust as needed
+                })
+
+      .catch(error => {
+        // Handle errors that occurred during the fetch
+        console.error('There has been a problem with your fetch operation:', error);
+      });
+
+
+  }
+</script>
+<script type="text/javascript">
+  function startZoom(e, containerId) {
+    const container = document.querySelector(`[data="${containerId}"]`);
+    const image = container.querySelector('img');
+
+    const offsetX = e.offsetX / container.offsetWidth * 100;
+    const offsetY = e.offsetY / container.offsetHeight * 100;
+
+    image.style.transformOrigin = `${offsetX}% ${offsetY}%`;
+    image.style.transform = 'scale(2)'; // Adjust the scale factor as needed
+  }
+
+  function stopZoom(containerId) {
+    const container = document.querySelector(`[data="${containerId}"]`);
+    const image = container.querySelector('img');
+
+    image.style.transform = 'scale(1)';
+  }
+</script>
+<%- include("../partials/user/footer") %>

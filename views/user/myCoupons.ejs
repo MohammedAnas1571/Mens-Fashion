@@ -1,0 +1,78 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+
+<style>
+  .tick-symbol {
+    display: none;
+    margin-left: 5px;
+  }
+
+  .copied .tick-symbol {
+    display: inline;
+  }
+
+  .copied .card-title {
+    font-weight: bold;
+    color: black;
+  }
+
+  .expired-ribbon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    display: none;
+  }
+
+  .expired .expired-ribbon {
+    display: block;
+  }
+</style>
+
+<div class="container mt-4">
+  <% if (typeof message !== 'undefined') { %>
+    <div class="alert alert-danger" style="font-size: 20px">
+      <%= message %>
+    </div>
+  <% } %>
+  <div class="row">
+    <% if (coupons.length) { %>
+      <% coupons.forEach((coupon, index) => { %>
+        <div class="col-md-6 mb-4">
+          <div class="card <%= coupon.expaire_date < currentDate ? 'expired' : '' %> border-success">
+            <div class="card-body">
+              <div class="expired-ribbon">Expired</div>
+              <h5 class="card-title" style="color: rgba(5, 5, 5, 0.986); font-weight: bold;">
+                <%= coupon.coupon_name %> !!
+                <span class="tick-symbol">&#10003;</span>
+              </h5>
+              <p class="card-text mb-3">Purchase <%= coupon.minimumPurchaseAmount %> and Get 
+                <%= coupon.discount_amount_or_percentage %> <%= coupon.discount_type === 'Percentage' ? '%' : ' ₹' %> Offer</p>
+              <p class="card-text mb-3">
+                <small><%= coupon.description %></small>
+              </p>
+              <div class="input-group">
+                <input type="text" class="form-control" value="<%= coupon.code %>" id="couponCode<%= index %>" readonly>
+                <button class="btn btn-outline-success" type="button" onclick="copyCouponCode('<%= index %>')">Copy</button>
+              </div>
+              <a href="/checkout" class="btn btn-success mt-3">Apply Coupon</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<%- include("../partials/user/footer") %>
+
+<script>
+  function copyCouponCode(index) {
+    var copyText = document.getElementById("couponCode" + index);
+    copyText.select();
+    document.execCommand("copy");
+  }
+</script>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<style>
+    #timer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2em;
+        color: #007bff; /* Set your desired color */
+        margin-top: 20px;
+    }
+  
+  .custom-btn {
+    width: 30%;
+  }
+</style>
+</style>
+<body>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        OTP Verification
+                    </div>
+                    
+                 
+                   
+                    <% if(typeof message !=='undefined' ){ %>
+                        <div class="alert alert-danger"style="font-size :20px"><%= message %></div>
+                        <% } %>
+                        <p class="text-success font-weight-bold  "id="info" style="margin-left: 30px; font-size: 20px;">otp send in your mail</p>
+               
+                   <div class="card-body">
+                   
+                        <form  action="/otp" method="post">
+                            <div class="form-group">
+
+                                <label for="otpInput">Enter OTP:</label>
+                                <input type="text" class="form-control" id="otpInput" name="otp" placeholder="Enter OTP"
+                                    required>
+                                 <input type="hidden" name="userId" value="<%= userId %>">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary custom-btn" id="Verify">Verify OTP</button>
+                          
+
+                            <div id="resendOTP">
+                            
+                               
+                            </div>
+
+                        </form>
+                        <div id="timer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+   <!-- Add this script inside the <script> tag in your HTML file -->
+   
+    <script>
+        let countdownTime;
+        let timerElement = document.getElementById("timer");
+
+        // Retrieve the remaining time from localStorage
+        if (localStorage.getItem("expire")) {
+          countdownTime = Number(localStorage.getItem("expire")) 
+        } else {
+          // Set the countdown time to 5 minutes (300 seconds) if not in localStorage
+          countdownTime = Number("<%= n %>");
+          localStorage.setItem("expire", countdownTime);
+        }
+      
+        function startTimer() {
+          let minutes, seconds;
+          let countdown = setInterval(function () {
+            minutes = parseInt(countdownTime / 60, 10);
+            seconds = parseInt(countdownTime % 60, 10);
+      
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+      
+            timerElement.innerHTML = minutes + ":" + seconds;
+      
+            countdownTime--;
+            localStorage.setItem("expire", countdownTime);
+      
+            if (countdownTime < 0) {
+              clearInterval(countdown);
+              timerElement.innerHTML = "New OTP! Please click Resend OTP.";
+              localStorage.removeItem("expire");
+      
+              document.getElementById("resendOTP").innerHTML =
+                '<a href="/resendOTP/<%= userId %>" class="btn btn-primary custom-btn">Resend OTP</a>';
+      
+              document.getElementById("Verify").remove();
+              document.getElementById("info").remove();
+            }
+          }, 1000); // Update the timer every 1 second (1000 milliseconds)
+        }
+      
+        window.onload = startTimer;
+      </script>
+      
+
+    
+</body>
+
+</html>
+
+
+
+
+

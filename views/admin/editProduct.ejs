@@ -1,0 +1,201 @@
+<%- include("../partials/admin/header") %>
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h3 class="page-title">Product Details</h3>
+        </div>
+        <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Product Information</h4>
+                        <p class="card-description text-info">Basic product info</p>
+                        <form action="/admin/productlist/Edit" method="post" class="forms-sample"
+                            enctype="multipart/form-data">
+                            <input type="hidden" value="<%= id %>" name="id">
+                            <% if (message !== "" ) { %>
+                                <p class="text-danger">
+                                    <%= message %>
+                                </p>
+                            <% } %>
+
+                            <!-- Product Name -->
+                            <div class="form-group">
+                                <label for="productName">Product Name</label>
+                                <input type="text" class="form-control text-black" value="<%= product.product_name %>"
+                                    name="productName" id="productName" placeholder="Name">
+                            </div>
+
+                            <!-- Brand Name -->
+                            <div class="form-group">
+                                <label for="brandName">Brand Name</label>
+                                <input type="text" class="form-control text-black" value="<%= product.brand_name %>"
+                                    name="brandName" id="brandName" placeholder="Brand Name">
+                            </div>
+
+                            <!-- Price -->
+                            <div class="form-group">
+                                <label for="price">Price</label>
+                                <input type="number" class="form-control text-black" value="<%= product.price %>"
+                                    name="price" id="price" placeholder="Price">
+                            </div>
+
+                            <!-- Offer % -->
+                            <div class="form-group">
+                                <label for="offer">Offer %</label>
+                                <input type="text" class="form-control text-black" name="offer"
+                                    value="<%= product.offer %>" id="offer" placeholder="Offer Price %">
+                            </div>
+
+                            <!-- Stock Count -->
+                            <div class="form-group">
+                                <label for="stockCount">Stock Count</label>
+                                <input type="number" class="form-control text-black" value="<%= product.stock %>"
+                                    name="stock" id="stockCount" placeholder="Count">
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea class="text-black form-control" id="description"
+                                    name="description" rows="8"
+                                    placeholder="Write about the Product"><%= product.description %></textarea>
+                            </div>
+
+                            <!-- Product Categories and Tags -->
+                            <div class="col-md-12 grid-margin stretch-card">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title">Product Categories and Tags</h4>
+                                        <div class="form-group">
+                                            <label for="category">Category</label>
+                                            <select class="form-control form-control-lg text-black" name="category"
+                                                id="category">
+                                                <option><%= product.category %></option>
+                                                <% Categories.forEach(category => { %>
+                                                    <option><%= category.categoryName %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Images Upload -->
+                            <div class="form-group">
+                                <label>Images Upload (Required: 3)</label>
+                                <div class="input-group col-md-12">
+                                    <% product.images.forEach(image => { %>
+                                        <div style="position: relative;">
+                                            <!-- Display the image -->
+                                            <img
+                                                src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>"
+                                                alt="<%= product.product_name %>"
+                                                style="width: 180px;height: 180px;">
+
+                                            <!-- Add a "Delete" button (X button) -->
+                                            <a class="btn btn-danger btn-delete-image" href="/admin/productlist/<%= image._id %>/<%= id %>/deleteImg">X</a>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                                <br><br>
+                                <div>
+                                    <input type="file" id="images" name="images"
+                                        multiple class="form-control file-upload-info"
+                                        onchange="previewImages(event)">
+                                </div>
+                                <div class="preview-container" id="preview-container">
+                                    <!-- Image previews will be added here dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Color -->
+                            <div class="form-group">
+                                <label for="color">Color</label>
+                                <select class="form-control text-black" name="color" id="color">
+                                    <option selected disabled><%= product.color %></option>
+                                    <option>White</option>
+                                    <option>Black</option>
+                                    <option>Blue</option>
+                                    <option>Silver</option>
+                                    <option>Gold</option>
+                                    <option>Red</option>
+                                    <option>Gray</option>
+                                    <option>Yellow</option>
+                                    <option>Pink</option>
+                                </select>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImages(event) {
+        var previewContainer = document.getElementById('preview-container');
+        previewContainer.innerHTML = '';
+
+        var files = event.target.files;
+
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+
+            if (file.type.startsWith('image/')) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    var previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100px'; // Set your desired width
+
+                    var deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-danger btn-delete-image';
+                    deleteBtn.innerHTML = 'X';
+                    deleteBtn.onclick = function () {
+                        previewContainer.removeChild(previewItem);
+                    };
+
+                    previewItem.appendChild(img);
+                    previewItem.appendChild(deleteBtn);
+                    previewContainer.appendChild(previewItem);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+    }
+
+    function deleteImage(imageId) {
+        // Perform the necessary logic to delete the image on the server
+        // You can make an AJAX request to the server to handle the deletion
+        console.log('Deleting image with ID:', imageId);
+    }
+</script>
+
+<style>
+    .preview-container {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .preview-item {
+        margin: 10px;
+        position: relative;
+    }
+
+    .btn-delete-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        cursor: pointer;
+    }
+</style>

@@ -1,0 +1,459 @@
+<%- include("../partials/user/header") %>
+<%- include("../partials/user/navBar") %>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.css">
+</head>
+
+<body>
+  <!-- Your HTML content here -->
+
+  <!-- SweetAlert JS script -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+
+  <!-- Breadcrumb Section Begin -->
+  <section class="breadcrumb-option">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="breadcrumb__text">
+            <h4>Check Out</h4>
+            <div class="breadcrumb__links">
+              <a href="/">Home</a>
+              <a href="/shop">Shop</a>
+              <span>Check Out</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Breadcrumb Section End -->
+
+  <% if(typeof message !=='undefined' ){ %>
+  <div class="alert alert-danger " style="font-size :20px">
+    <%= message %>
+  </div>
+  <% } %>
+  <section class="checkout spad">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-6" style="display: flex; align-items:center;">
+          <p class="" style="font-size: 30px; font-weight: bold;">Select Your Delivery Address
+            :
+          </p>
+
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+
+          <div class="cart__discount">
+            <h6>Discount coupon</h6>
+            <form id="formId">
+              <input type="text" id="couponInput" placeholder="Coupon code" name="coupenCode">
+              <button type="submit">Apply</button>
+
+
+            </form>
+            <div id="p"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+
+        <% if(typeof message !=='undefined' ){ %>
+        <div class="alert alert-danger " style="font-size :20px">
+          <%= message %>
+        </div>
+        <% } %>
+
+        <div class="col-lg-8 col-md-6">
+          <% address.forEach((addressItem, index)=> { %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <label>
+                <input type="radio" <%= index === 0 ? 'checked' : '' %> name="selectedAddress" value="<%= addressItem._id %>" class="card-input-element" />
+
+                <div class="panel panel-default card-input">
+                  <div class="panel-body">
+                    <span>
+                      <%= addressItem.userName %>,
+                    </span>
+                    <span>
+                      <%= addressItem.email %>,
+                    </span>
+                    <span>
+                      <%= addressItem.mobile %>,
+                    </span>
+                    <span>
+                      <%= addressItem.line1 %>,
+                    </span>
+                    <span>
+                      <%= addressItem.place %>,
+                    </span>
+                    <span>
+                      <%= addressItem.post %>,
+                    </span>
+                    <span>
+                      <%= addressItem.postcode %>,
+                    </span>
+                    <span>
+                      <%= addressItem.district %>,
+                    </span>
+                    <span>
+                      <%= addressItem.state %>,
+                    </span>
+                    <span>
+                      <%= addressItem.country %>
+                    </span>
+                  </div>
+                </div>
+              </label>
+            </div>
+            <div class="card-footer">
+              <a href="/editaddress/<%= addressItem.id %>" class="btn btn-primary">Edit
+                address</a>
+            </div>
+          </div>
+
+          <% }); %>
+
+
+
+          <a href="/addaddress" class=" btn site-btn  mt-3">+ Add Address </a>
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+          <div class="checkout__order">
+            <h4 class="order__title">Your order</h4>
+            <ul class="checkout__total__products">
+              <!-- Your Order EJS code here -->
+              <% products.forEach((product, index)=> { %>
+              <li>
+                <%= index + 1 %>. <%= product.product.product_name %> <span>
+                  <%= product.quantity %>* <%=
+                                                                                product.product.price %> = &#8377;
+                  <%= product.totalAmount %>
+                </span>
+              </li>
+              <% }); %>
+            </ul>
+            <ul class="checkout__total__all">
+              <li>Subtotal <span>
+                  &#8377; <%= user.grandTotal %>
+                </span></li>
+
+              <li>Discount <span id="Discount"> &#8377; 0
+                </span></li>
+              <li>Total <span id="Grand">
+                  &#8377; <%= user.grandTotal %>
+                </span></li>
+            </ul>
+
+            <p><strong>Choose Your Payment Options:</strong></p>
+            <div class="checkout__input__checkbox">
+              <label for="payment-cash" class="custom-radio-label">
+                <strong>Cash On Delivery</strong>
+                <input type="radio" checked id="payment-cash" name="paymentMethod" value="cod" class="custom-radio-input" />
+                <span class="custom-radio-mark"></span>
+              </label>
+            </div>
+
+            <div class="checkout__input__checkbox">
+              <label for="payment-razerpay" class="custom-radio-label">
+                <strong>Razer Pay</strong>
+                <input type="radio" id="payment-razerpay" name="paymentMethod" value="razorPay" class="custom-radio-input" />
+                <span class="custom-radio-mark"></span>
+              </label>
+
+            </div>
+
+
+            <button id="placeOrderBtn" class=" btn site-btn  mt-3">PLACE
+              ORDER</button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <%- include("../partials/user/footer") %>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+  <script>
+    let cId;
+    let rcid = "<%= user.code %>"
+    if (rcid) {
+
+      fetch("/applyCoupon", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            couponCode: rcid
+          })
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (result.error) {
+            console.log(result.error);
+            displayMessage(result.error);
+          } else {
+
+            data = result.newAmount;
+            console.log(result);
+            cId = result.id
+            // console.log(Id);
+
+            const minusAmount = result.discountAmount;
+            console.log(result);
+            const discountElement = document.getElementById("Discount");
+            const grandTotalElement = document.getElementById("Grand");
+
+
+
+            discountElement.innerHTML = `₹ ${minusAmount}`
+            grandTotalElement.innerHTML = `₹ ${data} `
+
+
+
+          }
+        })
+    }
+    let data = Number("<%= user.grandTotal %>")
+
+
+
+
+    let discount = Number("<%= user.discountAmount %>")
+    if (discount) {
+      data -= discount
+
+
+      document.getElementById("Grand").innerHTML = `₹ ${data}`
+    }
+    document.getElementById("formId").addEventListener("submit", (e) => {
+      e.preventDefault()
+      applyCoupon()
+
+    })
+
+    document.getElementById("placeOrderBtn").addEventListener("click", function(e) {
+      // const swalalert = document.getElementById("placeOrderBtn")
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      const currentAddress = document.querySelector('input[name="selectedAddress"]:checked').value
+
+
+
+      if (paymentMethod === "razorPay") {
+        fetch(`/createPayment`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+            "couponCode":cId
+
+            })
+
+          })
+          .then(response => {
+            // Check if the request was successful
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            // Parse the JSON data from the response
+            return response.json();
+          }).then(data => {
+
+            console.log(data.orderId);
+            if (data.orderId) {
+              var options = {
+                "key": "rzp_test_ug999EX94pybTW",
+                "currency": "INR",
+                "name": "Mens Fashion's",
+                "description": "Test Transaction",
+                "image": "/user/img/logo.png",
+
+                "order_id": data.orderId, // Make sure this matches the order ID received from the server
+                "handler": function(response) {
+                  payment("razorPay");
+
+                },
+                "prefill": {
+                  "name": "<%= user.userName %>",
+                  "email": "<%= user.email %>",
+
+                },
+                "theme": {
+                  "color": "#3399cc"
+                }
+              };
+
+
+              var rzp1 = new Razorpay(options);
+
+              rzp1.on('payment.failed', function(response) {
+                // Display SweetAlert on payment failure
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Payment Failed',
+                  text: 'There was an issue processing your payment. Please try again.',
+                });
+              });
+
+
+              rzp1.open();
+
+            }
+          })
+
+
+
+      } else {
+
+        payment("cod")
+
+
+      }
+
+
+      function payment(paymentMethod) {
+
+        const couponInput = document.getElementById("couponInput").value;
+
+        fetch(`/checkOut/${currentAddress}/${paymentMethod}/placeOrder`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+
+              couponCode: cId 
+            })
+
+
+
+          })
+          .then(response => {
+            // Check if the request was successful
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            // Parse the JSON data from the response
+            return response.json();
+          })
+          .then(data => {
+
+            swal("Thank you for your order  !", "Your Order Successfully Placed 😋 ", "success").then()
+              .then(() => {
+                // Redirect to another page after clicking OK
+
+                window.location.href = "/orderStatus/" + data.placeId;
+              });
+
+
+          })
+          .catch(error => {
+            // Handle errors that occurred during the fetch
+            console.error('There has been a problem with your fetch operation:', error);
+          })
+
+      }
+    });
+  </script>
+
+
+  <script>
+    function applyCoupon(data) {
+      let couponInput
+      if (data) {
+        couponInput = data
+        console.log("yes");
+      } else {
+
+        couponInput = document.getElementById("couponInput").value;
+      }
+
+      console.log(couponInput);
+      if (couponInput) {
+        fetch("/applyCoupon", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              couponCode: couponInput
+            })
+          })
+          .then(response => response.json())
+          .then(result => {
+            if (result.error) {
+              console.log(result.error);
+              displayMessage(result.error);
+            } else {
+
+              data = result.newAmount;
+              console.log(result);
+              cId = result.id
+              // console.log(Id);
+
+              const minusAmount = result.discountAmount;
+              console.log(result);
+              const discountElement = document.getElementById("Discount");
+              const grandTotalElement = document.getElementById("Grand");
+
+
+
+              discountElement.innerHTML = `₹ ${minusAmount}`
+              grandTotalElement.innerHTML = `₹ ${data} `
+
+
+
+            }
+          })
+
+      } else {
+        displayMessage("Empty data not allowed");
+      }
+    }
+
+    function displayMessage(message) {
+
+      console.log(message);
+      // Create a new paragraph element with the message
+      const messageElement = document.getElementById("p");
+      messageElement.classList.add("text-danger");
+      messageElement.innerText = message;
+
+      // Append the message element to the container
+      // Remove the message element after 5 seconds
+      setTimeout(() => {
+        // messageContainer.removeChild(messageElement);
+        messageElement.innerHTML = " "
+      }, 5000); // 5000 milliseconds (5 seconds)
+    }
+
+    // // Call the displayMessage function with your message
+    // const message =
+    // if (message || message !== undefined) {
+    //   displayMessage(message);
+    // }
+  </script>
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>

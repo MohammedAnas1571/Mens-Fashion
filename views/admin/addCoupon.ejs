@@ -1,0 +1,251 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+  .btn-primary.btn-lg {
+    font-size: 20px;
+    /* Adjust the font size to make it smaller */
+    padding: 6px 12px;
+    width: 200px;
+    height: auto;
+
+
+    /* Adjust the padding (height and width) for a smaller button */
+  }
+
+  .center-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Set a height for the container, e.g., 100vh for full viewport height */
+  }
+</style>
+<% if(typeof message !=='undefined' ){ %>
+<div class="alert alert-danger " style="font-size :20px">
+  <%= message %>
+</div>
+<% } %>
+<div class="container-scroller">
+
+  <!-- partial -->
+  <div class="container-fluid page-body-wrapper">
+    <!-- partial:partials/_navbar.html -->
+
+    <!-- partial -->
+    <div class="main-panel" style="width: 100vw;">
+      <div class="content-wrapper">
+        <div class="row">
+          <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Add Coupon</h4>
+                <a href="/admin/coupon">Back to Coupons</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <form action="/admin/addcoupon" method="post" id="couponForm">
+
+
+                  <div class="form-group">
+                    <label for="exampleInputCity1">Coupon Name :</label>
+                    <input type="text" class="form-control" name="couponName" id="name" placeholder="Enter Coupon Name">
+                  </div>
+
+                  <div id="nameError" style="color: red;"></div>
+
+                  <div class="form-group">
+                    <label for="exampleInputCity1">Discount Type : </label>
+                    <select class="form-control text-black" name="type" id="type">
+                      <option value="-1">Select</option>
+                      <option>Amount</option>
+                      <option>Percentage</option>
+
+                    </select>
+                  </div>
+                  <div id="typeError" style="color: red;"></div>
+                  <div class="form-group">
+                    <label for="exampleInputCity1">Minimum Purchase Amount :</label>
+                    <input type="text" class="form-control" name="MinimumpurchaseAmount" id="MinimumpurchaseAmount" placeholder="Minimum Purchase Amount">
+                  </div>
+                  <div id="miError" style="color: red;"></div>
+                  <div class="form-group">
+                    <label for="exampleInputCity1">Discount Amount / Percentage
+                      :</label>
+                    <input type="text" class="form-control" name="amountOrPercentage" id="dOrp" placeholder="Amount Or Percentage">
+                  </div>
+                  <div id="amountError" style="color: red;"></div>
+                  <div class="form-group">
+                    <label for="exampleInputCity1">Description:</label>
+                    <input type="text" class="form-control" name="Description" id="Description" placeholder="Enter the Description">
+                  </div>
+                  <div id="descriptionErrorMessgae" style="color: red;"></div>
+              </div>
+
+              <div class="center-div">
+                <button type="submit" class="btn btn-primary btn-lg mb-4">Add coupon</button>
+              </div>
+
+
+
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- content-wrapper ends -->
+    <!-- partial:../../partials/_footer.html -->
+
+
+    <!-- partial -->
+  </div>
+  <!-- main-panel ends -->
+</div>
+<!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller -->
+<!-- plugins:js -->
+
+<script>
+  const couponForm = document.getElementById("couponForm")
+
+  const nameInput = document.getElementById("name")
+  const nameError = document.getElementById("nameError")
+
+  const descriptionInput = document.getElementById("Description")
+  const descriptionError = document.getElementById("descriptionErrorMessgae")
+  const ch = /^\d+$/;
+
+  const typeInput = document.getElementById("type")
+  const typeError = document.getElementById("typeError")
+
+  const amountInput = document.getElementById("MinimumpurchaseAmount")
+  const amountError = document.getElementById("miError")
+
+  const amountoptioInput = document.getElementById("dOrp")
+  const amountoptionError = document.getElementById("amountError")
+
+  function discountOptionValidation() {
+    const amount = amountoptioInput.value
+    
+    if (amount === "") {
+      amountoptionError.innerHTML = "this fiels is required.."
+      return false
+    }
+    if (parseFloat(amount) > 500) {
+      amountoptionError.innerHTML = "Discount should be between 0 to 500.."
+      return false
+    }
+    if (!ch.test(amount)) {
+      amountoptionError.innerHTML = "Amount must be number only..."
+      return false
+    } else if (amount <= 0) {
+      amountoptionError.innerHTML = "Zero not allowd"
+      return false
+    } 
+     else if (typeInput.value === "Percentage") {
+      if (amount > 100) {
+        amountoptionError.innerHTML = "Percentage must be under 100%..."
+        return false
+      } else {
+        amountoptionError.innerHTML = ""
+        return true
+      }
+    } else {
+      amountoptionError.innerHTML = ""
+      return true
+    }
+  }
+
+  function MinimumpurchaseAmountValidation() {
+    const amount = amountInput.value.trim()
+    if (amount === "") {
+      amountError.innerHTML = "Amount is required.."
+      return false
+    } else if (!ch.test(amount)) {
+      amountError.innerHTML = "Amount must be number only..."
+      return false
+    } else {
+      amountError.innerHTML = ""
+      return true
+    }
+  }
+
+  function typeVaidation() {
+    const value = typeInput.value
+    if (value === "-1") {
+      typeError.innerHTML = "Discount Type is requried.."
+      return false
+    } else {
+      typeError.innerHTML = ""
+      return true
+    }
+  }
+
+
+
+  function descriptionValidation() {
+    const sdescriptionValue = descriptionInput.value.trim()
+    if (sdescriptionValue === "") {
+      descriptionError.innerHTML = "Description is requred.."
+      return false
+    } else if (ch.test(sdescriptionValue)) {
+      descriptionError.innerHTML = "Description only includes the letters.."
+      return false
+    } else if (sdescriptionValue.length < 10) {
+      descriptionError.innerHTML = "Description must be greater then 10 letters.."
+      return false
+    } else {
+      descriptionError.innerHTML = ""
+      return true
+    }
+  }
+
+  function nameValidation() {
+    const nameValue = nameInput.value.trim()
+    if (nameValue === "") {
+      nameError.innerHTML = "name is required.."
+      return false
+    } else if (ch.test(nameValue)) {
+      nameError.innerHTML = "number not allowed, only letters"
+      return false
+    } else {
+      nameError.innerHTML = ""
+      return true
+    }
+  }
+  couponForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+    const validations = [
+      descriptionValidation(),
+      nameValidation(),
+      typeVaidation(),
+      MinimumpurchaseAmountValidation(),
+      discountOptionValidation()
+    ];
+    const hasErrors = validations.some(validation => validation === false);
+    if (!hasErrors) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Form submitted successfully!',
+      }).then(() => {
+        couponForm.submit();
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Please fix the form errors before submitting.',
+      });
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+<%- include('../partials/admin/footer') %>

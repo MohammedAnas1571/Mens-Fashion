@@ -1,0 +1,294 @@
+
+
+<%- include("../partials/admin/header") %>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Order Management</title>
+<link rel="stylesheet" href="/admin/css/style1.css">
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+
+  /* Add your CSS styles for the dropdown here if needed */
+  .container {
+  max-width: auto;
+  margin: 0 auto;
+  overflow-x: auto; /* Add this line for horizontal scrolling */
+  white-space: nowrap; /* Prevent line breaks for inline elements */
+}
+
+/* Add styling for the scrollbar if needed */
+.container::-webkit-scrollbar {
+  height: 12px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #f50404;
+  border-radius: 6px;
+}
+
+.container::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    width: auto; /* Adjusted to auto */
+  }
+
+  th {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    z-index: 1;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+
+  .dropdown-content a:hover {
+    background-color: #ddd;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(5, 5, 5);
+    padding-top: 60px;
+    text-align: center;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 10px;
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Add additional styles if needed */
+  
+
+  .product-name {
+    margin-bottom: 5px;
+  }
+  td.products {
+  width: auto ;  /* Adjust the width as needed */
+}
+
+td.damage {
+  width: auto; /* Adjust the width as needed */
+}
+  
+</style>
+</head>
+
+<body>
+  <div id="successModal" class="modal">
+    <div class="modal-content bounceInDown">
+      <span class="close">&times;</span>
+      <p>Status updated successfully!</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <table id="orders-table">
+      <thead>
+        <tr>
+            <th>No</th>
+          <th>Order ID</th>
+          <th>Customer Name</th>
+          <th>Products</th>
+          <th>Quantity</th>
+          <th>Total Price</th>
+          <th>Status</th>
+          <th>Address</th>
+          <th>Cancel Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.forEach((orderItem,index) => { %>
+        <tr>
+            <td><%= index+1 %></td>
+          <td><%= orderItem.orderId %></td>
+          <td><%= orderItem.deliveryAddress.userName %></td>
+          <td class="products">
+            <% orderItem.products.forEach(productItem => { %>
+            <div class="product-name">• <%= productItem.product.product_name %></div>
+            <% }); %>
+          </td>
+          <td>
+            <% orderItem.products.forEach(productItem => { %>
+            • <%= productItem.quantity %><br>
+            <% }); %>
+          </td>
+          <td><%= orderItem.totalPrice %></td>
+          <td>
+            <% if (orderItem.status !== "Cancelled"  && orderItem.status !== "Delivered" && orderItem.status !== "Returned") { %>
+              <div class="dropdown">
+                <button class="dropbtn" id="status-btn-<%= orderItem._id %>" onclick="showDropdown('<%= orderItem._id %>')"><%= orderItem.status %></button>
+                <div class="dropdown-content" id="dropdown-<%= orderItem._id %>">
+                  <a onclick="changeStatus('<%= orderItem._id %>', 'Pending')">Pending</a>
+                  <a onclick="changeStatus('<%= orderItem._id %>', 'Processing')">Processing</a>
+                  <a onclick="changeStatus('<%= orderItem._id %>', 'Shipped')">Shipped</a>
+                  <a onclick="changeStatus('<%= orderItem._id %>', 'Delivered')">Delivered</a>
+                  <a onclick="changeStatus('<%= orderItem._id %>', 'Cancelled')">Cancelled</a>
+                 
+                </div>
+              </div>
+           <% }else if ( orderItem.status === "Delivered") {  %>
+            <button class="dropbtn" style="color: #fffcfc; background-color: #09a1e7da;" id="status-btn-<%= orderItem._id %>"><%= orderItem.status %></button>
+
+             <% } else { %>
+                <button class="dropbtn" style="color: #ebe6e6; background-color: #F70D1A;" id="status-btn-<%= orderItem._id %>"><%= orderItem.status %></button>
+
+            <% } %>
+          </td>
+          <td><%= orderItem.deliveryAddress.userName %>, <%= orderItem.deliveryAddress.email %>,
+            <%= orderItem.deliveryAddress.mobile %>, <%= orderItem.deliveryAddress.line1 %>,
+            <%= orderItem.deliveryAddress.place %>, <%= orderItem.deliveryAddress.post %>,
+            <%= orderItem.deliveryAddress.postcode %>, <%= orderItem.deliveryAddress.district %>,
+            <%= orderItem.deliveryAddress.state %>, <%= orderItem.deliveryAddress.country %></td>
+           <td class="damage"><%= orderItem.damage %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // ... Your existing script
+  </script>
+</body>
+
+</html>
+
+
+  <script>
+    function showDropdown(orderId) {
+      var dropdown = document.getElementById("dropdown-" + orderId);
+      dropdown.classList.toggle("show");
+    }
+
+    function changeStatus(orderId, newStatus) {
+      fetch(`/admin/managment/${orderId}/${newStatus}/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
+
+          const dropdownId = 'dropdown-' + orderId;
+          const dropdownElement = document.getElementById(dropdownId);
+          const buttonElement = document.getElementById('status-btn-' + orderId);
+
+          if (data.status === "Cancelled" || data.status === "Delivered" || data.status === "Returned") {
+            // Remove the dropdown content
+            dropdownElement.innerHTML = "";
+
+       
+           if( data.status === "Delivered"){
+                buttonElement.style.backgroundColor = '#09a1e7da';
+                document.getElementById('status-btn-' + orderId).textContent = data.status;
+                    showSuccessModal();
+              
+            }
+            else{
+
+            buttonElement.style.backgroundColor = '#F70D1A';
+            document.getElementById('status-btn-' + orderId).textContent =data.status;
+            showSuccessModal();}
+        }else {
+            // Update the status button and show the success modal
+            document.getElementById('status-btn-' + orderId).textContent = data.status;
+            showSuccessModal();
+          }
+        })
+
+
+    }
+
+    function showSuccessModal() {
+      const modal = document.getElementById('successModal');
+      modal.style.display = 'block';
+      const closeModal = document.querySelector('.close');
+      closeModal.onclick = function() {
+        modal.style.display = 'none';
+      };
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = 'none';
+        }
+      };
+    }
+  </script>
+</body>
+
+</html>
