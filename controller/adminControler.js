@@ -7,6 +7,7 @@ const Product = require("../model/productModel")
 const productCategry = require("../model/productCategory")
 const Coupon = require("../model/couponModel")
 const { log } = require("util")
+const Banner = require("../model/banner")
 
 //ADMIN LOGIN
 const loadAaminLogin = async (req, res) => {
@@ -110,14 +111,12 @@ const addProductCategory = async (req, res) => {
 
     const name = req.body.name.toLowerCase()
 
-
-
-
     const exist = await productCategry.findOne({ categoryName: name })
 
     console.log(exist);
 
     try {
+        
         if (!exist) {
             const category = new productCategry({
                 categoryName: name,
@@ -145,25 +144,123 @@ const addProductCategory = async (req, res) => {
 const loadCategory = async (req, res) => {
     try {
         const Categores = await productCategry.find().sort({ _id: -1 })
-        res.render("admin/productCategory", { Categores })
+        res.render("admin/productCategory", { Categores,message:"" })
 
     } catch {
         res.render("admin/500")
     }
 }
-const deleteCategory = async (req, res) => {
-    try {
-        const { id } = req.params
-        const deleteCategory = await productCategry.findByIdAndDelete({ _id: id })
-        if (deleteCategory) {
-            res.redirect("/admin/Category-management")
+
+const loadEditCategory = async (req,res)=>{
+ 
+        try {
+            const id = req.params.id
+    
+            const catagory = await productCategry.findOne({ _id: id })
+          
+    
+            res.render("admin/editCatagory", { catagory })
+        
+        } catch {
+            res.render("admin/500")
         }
-
-    } catch {
-        res.render("admin/500")
     }
-}
 
+
+    const editCategory = async (req, res) => {
+        console.log("018516");
+
+        const { id,catagoryName,description} = req.body;
+        console.log(req.body);
+
+
+            const name = req.body.catagoryName.toLowerCase()
+            const exist = await productCategry.findOne({ categoryName: name })
+        try {
+       
+           if(!exist){
+              
+
+            
+
+            // Assuming you have an existing product with its _id that you want to update
+            const catagoryId = id; // Replace with the actual product's _id
+    
+            // Define the fields you want to update
+            const updateFields = {
+                categoryName: catagoryName,
+    
+                 description:description
+
+    
+            };
+            console.log(updateFields);
+    
+            // Update only the specified fields using $set
+            const updatedCatagory = await productCategry.findByIdAndUpdate(
+                catagoryId,
+                { $set: updateFields },
+                { new: true } // To get the updated document back
+            );
+    
+            if (req.file) {
+                // Assuming the single file is stored in req.file
+                updatedCatagory.image = {
+                    data: req.file.buffer,
+                    contentType: req.file.mimetype
+                };
+                await updatedCatagory.save();
+            }
+           
+            if (updatedCatagory) {
+              
+                return res.redirect("/admin/Category-management")
+            }
+        }else{
+            return res.render("admin/editCatagory",{message:"This Catagory is Alraedy exist"})     
+          }
+    
+    
+        } catch(error) {
+            console.log(error.message);
+            res.render("admin/500")
+        }
+    }
+
+
+    const catagoryDeactivate = async (req, res) => {
+        try {
+            
+            const { id } = req.params
+            const productsWithCategory = await Product.findOne({ category: id });
+            const Categores = await productCategry.find().sort({ _id: -1 })
+      
+            if (productsWithCategory) {
+                // Category is associated with products, handle accordingly
+                return res.render("admin/productCategory", {Categores,message:"This catagory is already used for product can't Deactivate" });
+            }
+
+            const change = await productCategry.updateOne({ _id: id }, { $set: { isBlock: true } })
+    
+            if (change) {
+    
+                return res.redirect("/admin/Category-management")
+            }
+        } catch {
+            res.render("admin/500")
+        }
+    }
+    const catagoryActivate = async (req, res) => {
+        try {
+            const id = req.params.id
+            const change = await productCategry.updateOne({ _id: id }, { $set: { isBlock: false } })
+            if (change) {
+                return res.redirect("/admin/Category-management")
+            }
+        } catch {
+            res.render("admin/500")
+        }
+    }
 
 
 
@@ -172,7 +269,7 @@ const loadProductCreate = async (req, res) => {
     try {
         const Categories = await productCategry.find()
 
-        res.render("admin/addProduct", { message: "", Categories })
+        res.render("admin/addProduct", {message:"",Categories})
     } catch {
         res.render("admin/500")
     }
@@ -182,16 +279,10 @@ const createProduct = async (req, res) => {
     console.log("Product added successfully.");
     const { productName, brandName, price,offer, description, stock, category, images, color } = req.body;
     try {
+         const saveCatagory = await productCategry.findOne({categoryName:category})
 
 
 
-
-        // Validate that required fields are provided
-        // if (!productName || ) {
-        //     return res.render('admin/addproduct', { message: "All fields are required. Please fill in all fields.", });
-
-
-        // Create the product
         const product = new Product({
             product_name: productName,
 
@@ -201,9 +292,7 @@ const createProduct = async (req, res) => {
             offer:offer,
             stock: stock,
             description: description,
-            category: category,
-
-
+            category: saveCatagory._id,
             color: color,
 
         });
@@ -220,14 +309,15 @@ const createProduct = async (req, res) => {
             return res.redirect("/admin/productlist")
         }
 
-    } catch {
+    } catch(error){
+        console.log(error.message);
         res.render("admin/500")
 
     }
 };
 const loadProductPage = async (req, res) => {
     try {
-        const products = await Product.find()
+        const products = await Product.find().populate("category")
         if (products) {
             return res.render('admin/productlist', { products })
         } else {
@@ -241,22 +331,25 @@ const loadProductEditPage = async (req, res) => {
     try {
         const id = req.params.id
 
-        const product = await Product.findOne({ _id: id })
-        const Categories = await productCategry.find({ categoryName: { $ne: product.category } })
+        const product = await Product.findOne({ _id: id }).populate("category")
+        const Categories = await productCategry.find({ categoryName: { $ne: product.category.categoryName} })
 
         res.render("admin/editProduct", { message: "", product, id, Categories })
 
 
 
-    } catch {
+    } catch(error) {
+        console.log(error.message);
         res.render("admin/500")
     }
 }
 const editProduct = async (req, res) => {
+    console.log("5465");
 
     const { productName, brandName, price,offer, description, stock, category, color, id } = req.body;
     console.log(req.body);
-    console.log(req.file);
+    
+    const saveCatagory = await productCategry.findOne({categoryName:category})
     try {
         // Assuming you have an existing product with its _id that you want to update
         const productId = id; // Replace with the actual product's _id
@@ -271,8 +364,8 @@ const editProduct = async (req, res) => {
             offer:offer,
             stock: stock,
             description: description,
-            category: category,
-
+            category: saveCatagory._id,
+            
 
             color: color,
 
@@ -302,7 +395,8 @@ const editProduct = async (req, res) => {
         }
 
 
-    } catch {
+    } catch(error) {
+        console.log(error.message);
         res.render("admin/500")
     }
 }
@@ -310,6 +404,9 @@ const productDeactivate = async (req, res) => {
     try {
 
         const { id } = req.params
+       
+        
+
         const change = await Product.updateOne({ _id: id }, { $set: { is_delete: true } })
 
         if (change) {
@@ -363,10 +460,12 @@ const orderManagment = async (req, res) => {
             .sort({ orderDate: -1 })
             .exec();
 
+   if(!orders){
+      return res.render("admin/orderManagment", { message:"No orders", order: orders  })
+   }
 
 
-
-        res.render("admin/orderManagment", { order: orders });
+        res.render("admin/orderManagment", { order: orders,message:"" });
     } catch {
         res.render("admin/500")
 
@@ -492,7 +591,7 @@ const couponManagement = async (req, res) => {
 const deleteCoupon = async (req, res) => {
     const id = req.params.id
     try {
-        const deleteCoupon = await Coupon.findByIdAndUpdate(id, { $set: { coupon_done: true } })
+         await Coupon.findByIdAndUpdate(id, { $set: { coupon_done: true } })
         return res.redirect("/admin/coupon")
     } catch (error) {
         console.log(error.message);
@@ -503,7 +602,7 @@ const activeCoupon = async (req, res) => {
     const id = req.params.id
     try {
         const ActiveCoupon = await Coupon.findByIdAndUpdate(id, { $set: { coupon_done: false } })
-        return res.redirect("/admin/coupon")
+        return res.redirect("/admin/coupon",{ActiveCoupon})
     } catch (error) {
         console.log(error.message);
     }
@@ -633,6 +732,152 @@ const calculateReport = async (req, res) => {
 };
 
 
+const banner  = async(req,res)=>{
+    try{
+        res.render("admin/banner")
+    }
+    catch{
+        res.render("admin/500")
+    }
+}
+const createBannner = async(req,res)=>{
+    try{
+    const banner = new Banner({
+        title: req.body.name,
+        subTitle:req.body.subTitle,
+        description: req.body.description,
+        image: {
+            data: req.file.buffer,
+            contentType: req.file.mimetype
+        }
+    });
+  
+
+    await banner.save();
+    // console.log("Category saved successfully.");
+    res.redirect("/admin/bannerlist")
+} catch{
+    res.render("admin/500")
+}
+}
+
+const loadBanner = async(req,res)=>{
+    const banner = await Banner.find()
+    try{
+        res.render("admin/bannerlist",{banner})
+    }catch{
+        res.render("admin/500")
+    }
+}
+const bannerDeactivate = async (req, res) => {
+    try {
+
+        const { id } = req.params
+       
+        
+
+        const change = await Product.updateOne({ _id: id }, { $set: { isBlock: true } })
+
+        if (change) {
+
+            return res.redirect('/admin/bannerlist')
+        }
+    } catch {
+        res.render("admin/500")
+    }
+}
+const bannerActivate = async (req, res) => {
+    try {
+        const id = req.params.id
+        const change = await Banner.updateOne({ _id: id }, { $set: { isBlock: false } })
+        if (change) {
+            return res.redirect('/admin/bannerlist')
+        }
+    } catch {
+        res.render("admin/500")
+    }
+}
 
 
-module.exports = { loadAaminLogin, calculateReport, loadSales, deleteCoupon, loadCouponEdit, activeCoupon, loadCoupon, addCoupon, couponManagement, adminlogin, dashboard, blockTheUser, UnblockTheUser, addProductCategory, loadCategory, loadAddCategory, deleteCategory, loadProductCreate, createProduct, loadProductPage, loadProductEditPage, editProduct, productDeactivate, productActivate, deleteImgDelete, orderManagment, updateStatus, addEditCoupon }
+const loadEditBanner = async (req,res)=>{
+ 
+    try {
+        const id = req.params.id
+
+        const banner = await Banner.findOne({ _id: id })
+      
+
+        res.render("admin/editBanner", { banner })
+    
+    } catch {
+        res.render("admin/500")
+    }
+}
+
+
+const editBanner = async (req, res) => {
+    console.log("018516");
+
+    const { id,name,subTitle,description} = req.body;
+    console.log(req.body);
+
+
+  
+    try {
+        const bannerId = id; // Replace with the actual product's _id
+
+        // Define the fields you want to update
+        const updateFields = {
+            title: name,
+            subTitle:subTitle,
+
+            
+            description: description,
+       
+
+        
+
+        };
+        console.log(updateFields);
+
+        // Update only the specified fields using $set
+        const updatedBanner = await Banner.findByIdAndUpdate(
+            bannerId,
+            { $set: updateFields },
+            { new: true } // To get the updated document back
+        );
+
+        if (req.file) {
+            // Assuming the single file is stored in req.file
+            updatedBanner.image = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            };
+            await updatedBanner.save();
+        }
+
+
+
+        // const deleteprodct = await Product.deleteOne({ _id: id });
+        if (updatedBanner) {
+            console.log("Product edited successfully.");
+            return res.redirect("/admin/bannerlist")
+        }
+
+
+    } catch(error) {
+        console.log(error.message);
+        res.render("admin/500")
+    }
+}
+   
+     
+          
+
+        
+
+     
+
+
+
+module.exports = { loadAaminLogin,bannerDeactivate,editBanner,loadEditBanner,bannerActivate,loadBanner,banner,createBannner,editCategory,loadEditCategory,catagoryActivate, calculateReport, loadSales, deleteCoupon, loadCouponEdit, activeCoupon, loadCoupon, addCoupon, couponManagement, adminlogin, dashboard, blockTheUser, UnblockTheUser, addProductCategory, loadCategory, loadAddCategory, catagoryDeactivate, loadProductCreate, createProduct, loadProductPage, loadProductEditPage, editProduct, productDeactivate, productActivate, deleteImgDelete, orderManagment, updateStatus, addEditCoupon }

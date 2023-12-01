@@ -29,10 +29,15 @@ app.use(nocache())
 
 
 
+
 mongoose
-  .connect(process.env.MONGO_URL)
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log('DB Connected'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
+
 
 app.use(session({
     secret: "abcdefg",
@@ -40,9 +45,9 @@ app.use(session({
     saveUninitialized: true
 }))
 
-
 app.use("/", userRouter)
 app.use("/admin",adminRouter)
+app.all("/*",(req,res)=>res.render("404"))
 
 
 

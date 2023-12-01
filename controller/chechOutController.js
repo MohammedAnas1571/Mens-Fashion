@@ -12,7 +12,7 @@ const Coupon = require("../model/couponModel")
 const razorPay = async (req, res) => {
     try {
 
-        const { couponCode } = req.body
+        const { couponCode,wallet } = req.body
         console.log(couponCode);
         const user = await User.findById(req.session.user)
         const code = await Coupon.findById(couponCode)
@@ -21,6 +21,10 @@ const razorPay = async (req, res) => {
             user.discountAmount = code.discount_amount_or_percentage;
         }else{
             user.discountAmount = 0
+        }
+        if(wallet){
+
+            user.grandTotal -=user.wallet
         }
           
 
@@ -77,7 +81,7 @@ const placeOrder = async (req, res) => {
 
         const { currentAddress, paymentMethod } = req.params
       
-        const { couponCode } = req.body
+        const { couponCode ,wallet} = req.body
        
         const user = await User.findById(req.session.user).populate("cart.product")
         if (couponCode) {
@@ -86,8 +90,16 @@ const placeOrder = async (req, res) => {
         }else{
             user.discountAmount = 0
         }
+        if(wallet && user.grandTotal>user.wallet){
 
+            user.grandTotal -=user.wallet
+            user.wallet = 0
+            user.save()
+        } if(wallet && user.grandTotal<user.wallet){
+            user.wallet-=user.grandTotal
+            user.save()
 
+        }
 
    
 
@@ -102,11 +114,6 @@ const placeOrder = async (req, res) => {
             deliveryAddress: currentAddress,
             paymentMethod: paymentMethod,
             grandTotal:user.grandTotal
-         
-
-
-
-
         })
          
 
@@ -138,6 +145,18 @@ const placeOrder = async (req, res) => {
     }
 
 }
+ const walletPayment =async(req,res)=>{
+    try{
+    const user = await User.findById(req.session.user)
+    res.json({ wallet:user.wallet})
+
+ }catch(error){
+    res.render("user/500")
+    console.log(error.message);
+ }
+ }
+
+
 const orderStatus = async (req, res) => {
     const orderId = req.params.id
 
@@ -240,4 +259,6 @@ const loadInvoice = async(req,res)=>{
 
 
 
-module.exports = { loadCheckOut, placeOrder, orderStatus, razorPay, addingCoupon,loadInvoice }
+
+
+module.exports = { loadCheckOut, placeOrder, orderStatus, razorPay, addingCoupon,loadInvoice,walletPayment }

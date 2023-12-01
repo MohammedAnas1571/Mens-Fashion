@@ -6,6 +6,9 @@ const bcrypt = require("bcrypt")
 const userOTPVerification = require("../model/userOTPverification")
 const Product = require("../model/productModel")
 const Catagory = require("../model/productCategory")
+const Banner = require("../model/banner")
+const { log } = require("util")
+const { ObjectId } = require("mongodb")
 
 
 
@@ -13,12 +16,13 @@ const Catagory = require("../model/productCategory")
 
 
 const loadHome = async (req, res) => {
-    const products = await Product.find({ is_delete: false }).sort({ _id: -1 });
-    const user = await User.findById(req.session.user)
-    console.log(user);
-   console.log(products);
+
+ 
     try {
-        res.render("user/home",{products,user});
+        const products = await Product.find({ is_delete: false }).sort({ _id: -1 });
+        const user = await User.findById(req.session.user)
+        const banner = await Banner.find({isBlock:false})
+        res.render("user/home",{products,user,banner});
     } catch {
         res.render("user/500")
     }
@@ -263,6 +267,78 @@ const loadShop = async (req, res) => {
         res.render("user/500");
     }
 };
+const loadSearch = async (req, res) => {
+    console.log(req.params.id);
+    const user = await User.findById(req.session.user)
+    try {
+        const page = parseInt(req.params.page) || 1;
+        const pageSize = 6;
+        const skip = (page - 1) * pageSize;
+
+        let products;
+        const catagory = await Catagory.find();
+    
+   console.log("234986");
+   if(req.params.id){
+  
+   products = await Product.find({ category: req.params.id ,is_delete:false}).skip(skip).limit(pageSize);
+   console.log("Products:", products);
+   }
+     
+        // Calculate total pages for pagination
+        const totalProducts = await Product.countDocuments({ is_delete: false });
+        const totalPages = Math.ceil(totalProducts / pageSize);
+        console.log(totalProducts);
+
+        res.json( {
+            catagory,
+            products,
+            currentPage: page,
+            totalPages: totalPages,
+            user
+        });
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+        res.render("user/500");
+    }
+};
+
+const loadBrand = async (req, res) => {
+    console.log(req.params.name);
+    const user = await User.findById(req.session.user)
+    try {
+        const page = parseInt(req.params.page) || 1;
+        const pageSize = 6;
+        const skip = (page - 1) * pageSize;
+
+        let products;
+        const catagory = await Catagory.find();
+    
+   console.log("234986");
+   if(req.params.name){
+  
+   products = await Product.find({ brand_name: req.params.name ,is_delete:false}).skip(skip).limit(pageSize);
+   console.log("Products:", products);
+   }
+     
+        // Calculate total pages for pagination
+        const totalProducts = await Product.countDocuments({ is_delete: false });
+        const totalPages = Math.ceil(totalProducts / pageSize);
+        console.log(totalProducts);
+
+        res.json( {
+            catagory,
+            products,
+            currentPage: page,
+            totalPages: totalPages,
+            user
+        });
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+        res.render("user/500");
+    }
+};
+
 
 
 const loadDetails = async (req, res) => {
@@ -291,4 +367,4 @@ const loadContact = async (req, res) => {
   };
 
 
-module.exports = { loadHome,loadContact, otpLoad, userSign, userRegister, userRegisterSave, userValid, verifyOTP, loadShop, loadDetails, forgotPassword, conformation, resetPassword, passwordSubmit, resendOTP };
+module.exports = { loadHome,loadContact,loadSearch,loadBrand, otpLoad, userSign, userRegister, userRegisterSave, userValid, verifyOTP, loadShop, loadDetails, forgotPassword, conformation, resetPassword, passwordSubmit, resendOTP };

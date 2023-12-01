@@ -150,6 +150,24 @@
                       </h6>
                     </div>
                   </div>
+
+                  <div
+                  class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
+                  <div class="text-md-center text-xl-left">
+                    <h6 class="mb-1">Total Tranfer to Wallet</h6>
+                    <!-- <p class="text-muted mb-0">07 Jan 2019, 09:12AM</p> -->
+                  </div>
+                  <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
+                    <h6 class="font-weight-bold mb-0">
+                      <% if (paymentoptins && paymentoptins.length> 1) { %>
+                        <%= paymentoptins[2].totalAmount %>
+                          <% } else { %>
+                            No Third payment information available.
+                            <% } %>
+
+                    </h6>
+                  </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -546,12 +564,13 @@
     var ctxDoughnut = document.getElementById('transaction').getContext('2d');
     var cod = "<%= paymentoptins[0]?.count || 0 %>";
     var razorpay = "<%= paymentoptins[1]?.count || 0 %>";
+    var wallet = "<%= paymentoptins[2]?.count || 0 %>";
     var myDoughnutChart = new Chart(ctxDoughnut, {
         type: 'doughnut',
         data: {
-            labels: ['COD', 'Zaropay', 'Wallet'],
+            labels: ['COD', 'RazorPay', 'wallet'],
             datasets: [{
-                data: [cod, razorpay, 0],
+                data: [cod, razorpay, wallet],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.5)',
                     'rgba(54, 162, 235, 0.5)',

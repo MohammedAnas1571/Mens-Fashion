@@ -199,15 +199,14 @@
                                     .toLocaleString() %>
             </td>
             <td>
-              <% if (order.paymentMethod ==="razorPay" ) { %>
-
-              <div class="text-success"><%= order.paymentMethod %> </div>
-              </label>
-              <% } else if (order.paymentMethod==="cod" ) {%>
-
-              <div class="text-warning"><%= order.paymentMethod %></div>
-              </label>
+              <% if (order.paymentMethod === "razorPay") { %>
+                <div class="text-success"><%= order.paymentMethod %></div>
+              <% } else if (order.paymentMethod === "cod") { %>
+                <div class="text-warning"><%= order.paymentMethod %></div>
+              <% } else if (order.paymentMethod === "wallet") { %>
+                <div class="text-danger">Wallet </div>
               <% } %>
+            
             </td>
             <td>
               <% if (order.status ==="Cancelled" ) { %>

@@ -1,0 +1,137 @@
+<%- include("../partials/admin/header") %>
+
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="row">
+      <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+
+          <div class="card-body">
+            <h4 class="card-title">Edit Banner</h4>
+            <a href="/admin/bannerlist">Back to Banner</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <% if(typeof message !=='undefined' ){ %>
+      <div class="alert alert-danger " style="font-size :20px">
+        <%= message %>
+      </div>
+      <% } %>
+      <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+          <div class="card-body">
+            <form id="bannerForm" action="/admin/editbanner" method="post" enctype="multipart/form-data">
+                <input type="hidden" value="<%= banner._id %>" name="id">
+              <div class="form-group">
+                <label>images upload :</label>
+                <div class="input-group col-xs-12">
+                  <input type="file" id="image" name="image" class="form-control file-upload-info">
+
+               
+
+                </div>
+                <div style="position: relative;">
+                    <input type="hidden" id="imagePresent" name="imagePresent" value="<%= banner.image ? 'true' : 'false' %>">
+                    <!-- Display the image -->
+                    <img
+                        src="data:<%= banner.image.contentType %>;base64,<%=banner.image.data.toString('base64') %>"
+                        alt=""
+                        style="width: 180px;height: 180px;">
+    
+                    <!-- Add a "Delete" button (X button) -->
+                  
+                </div>
+         
+              </div>
+
+              <div class="form-group">
+                <label for="exampleInputCity1">Title :</label>
+                <input type="text" class="form-control" name="name" id="title" value="<%= banner.title %>" placeholder="Title name" >
+                <div id="titleError" style="color: red;"></div>
+
+              </div>
+
+               
+              <div class="form-group">
+                <label for="exampleInputCity1"> Sub Title :</label>
+                <input type="text" class="form-control" name="subTitle" id="subTitle" value="<%= banner.subTitle %>" placeholder="Subtitle name" >
+                <div id="subTitleError" style="color: red;"></div>
+
+              </div>
+
+              <div class="form-group">
+                <label for="exampleInputCity1">Description : </label>
+                <input type="text" class="form-control" name="description" id="description" value="<%= banner.description %>" placeholder="enter description" >
+                <div id="descriptionError" style="color: red;"></div>
+
+              </div>
+
+              <button type="submit" class="btn btn-primary mb-4">Add</button>
+
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const couponForm = document.getElementById("bannerForm");
+  const nameInput = document.getElementById("title");
+  const nameError = document.getElementById("titleError");
+
+  const subTitleInput = document.getElementById('subTitle');
+  const subTitleError = document.getElementById('subTitleError')
+  
+
+  const description = document.getElementById("description");
+  const descriptionError = document.getElementById("descriptionError");
+
+
+
+ 
+
+function nameValidation() {
+  if (nameInput.value.trim() === "") {
+    nameError.innerHTML = "Please enter Title !";
+    return false;
+  } else {
+    nameError.innerHTML = "";
+    return true;
+  }
+}
+function subTitleValidation(){
+    if(subTitleInput.value.trim()===""){
+        subTitleError.innerHTML= 'Please Enter Sub-Title';
+        return false;
+        }else{
+            subTitleError.innerHTML=''
+            return true;
+            }
+        }
+
+function descriptionValidation() {
+  if (description.value.trim() === "") {
+    descriptionError.innerHTML = "Please enter Description!";
+    return false;
+  } else {
+    descriptionError.innerHTML = "";
+    return true;
+  }
+}
+
+  couponForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+    const validations = [
+       nameValidation(),
+      descriptionValidation(),subTitleValidation()
+      // Add this line
+    ];
+    const hasErrors = validations.some(validation => validation === false);
+    if (!hasErrors) {
+      couponForm.submit(); // Trigger the form submission
+    }
+  });
+</script>

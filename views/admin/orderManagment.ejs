@@ -151,6 +151,10 @@ td.damage {
   </div>
 
   <div class="container">
+    <% if (message !== "") { %>
+      <p class="text-danger"><%= message %></p>
+      <% } %>
+
     <table id="orders-table">
       <thead>
         <tr>
@@ -173,9 +177,14 @@ td.damage {
           <td><%= orderItem.deliveryAddress.userName %></td>
           <td class="products">
             <% orderItem.products.forEach(productItem => { %>
-            <div class="product-name">• <%= productItem.product.product_name %></div>
+                <% if (productItem.product) { %>
+                    <div class="product-name">• <%= productItem.product.product_name %></div>
+                <% } else { %>
+                    <div class="product-name">• Product not available</div>
+                <% } %>
             <% }); %>
-          </td>
+        </td>
+        
           <td>
             <% orderItem.products.forEach(productItem => { %>
             • <%= productItem.quantity %><br>

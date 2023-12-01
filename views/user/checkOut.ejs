@@ -173,6 +173,18 @@
 
             </div>
 
+            <div class="checkout__input__checkbox">
+              <label for="payment-wallet" class="custom-radio-label">
+                <strong>Wallet</strong>
+                <input type="radio" id="payment-wallet" name="paymentMethod" value="wallet" class="custom-radio-input" />
+                <span class="custom-radio-mark"></span>
+              </label>
+
+            </div>
+
+
+
+
 
             <button id="placeOrderBtn" class=" btn site-btn  mt-3">PLACE
               ORDER</button>
@@ -193,6 +205,10 @@
   <script>
     let cId;
     let rcid = "<%= user.code %>"
+    let wallet = false
+
+
+    
     if (rcid) {
 
       fetch("/applyCoupon", {
@@ -253,18 +269,16 @@
       // const swalalert = document.getElementById("placeOrderBtn")
       const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
       const currentAddress = document.querySelector('input[name="selectedAddress"]:checked').value
-
-
-
-      if (paymentMethod === "razorPay") {
-        fetch(`/createPayment`, {
+      function ras(){
+      fetch(`/createPayment`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-            "couponCode":cId
-
+              couponCode: cId,
+              wallet
+                
             })
 
           })
@@ -322,6 +336,74 @@
 
 
 
+    }
+      if (paymentMethod === "wallet") {
+        fetch(`/getwallet`, {
+            method: "POST"
+          })
+          .then(response => {
+            // Check if the request was successful
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+
+            // Parse the JSON data from the response
+            return response.json();
+          }).then(result => {
+
+
+            if (result.wallet === 0) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'wallet is Zero ! cannot do payment using wallet',
+              });
+
+            } else {
+              if (data > result.wallet) {
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Warning',
+                  text: `You Purchased above Wallet amount! So Your wallet balance is${result.wallet}. Please Pay ${data-result.wallet} Amount by Using Razor Pay`,
+                  showCancelButton: true,
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                  
+                    wallet = true;
+                    ras()
+                    // payment("razorPay")
+                  }
+                });
+
+              } else {
+
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Success',
+                  text: ' After Purchase Balance Will credited to your wallet.',
+
+                  showCancelButton: true,
+                  cancelButtonText: 'Cancel',
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    wallet = true;
+                    payment("wallet")
+
+                  } else {
+                    // User clicked "Cancel" or closed the modal
+                    // Handle cancellation logic if needed
+                  }
+                });
+
+              }
+            }
+
+
+
+          })
+
+      } else if (paymentMethod === "razorPay") {
+        ras()
       } else {
 
         payment("cod")
@@ -340,8 +422,8 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-
-              couponCode: cId 
+              wallet,
+              couponCode: cId
             })
 
 
@@ -457,3 +539,6 @@
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+</body>
+
+</html>

@@ -2,10 +2,10 @@ const express = require("express")
 const router = express.Router()
 const multer = require("multer")
 const { isLogedout, isLogged, logouting } = require("../middleware/Auth")
-const { loadHome,otpLoad,resendOTP, userSign, userRegister, userRegisterSave, userValid, verifyOTP, loadShop, loadDetails, forgotPassword, conformation, resetPassword, passwordSubmit,loadContact } = require("../controller/userController")
+const { loadHome,otpLoad,resendOTP,loadBrand, userSign, loadSearch,userRegister, userRegisterSave, userValid, verifyOTP, loadShop, loadDetails, forgotPassword, conformation, resetPassword, passwordSubmit,loadContact } = require("../controller/userController")
 const { loadCart, addCart, updateCart, deleteCart } = require("../controller/cartController")
 const { loadProfile,returnOrder,loadWallet ,myCoupons,profilePhoto, addAddress, loadAddress, editProfile, updateEdit,deleteAddress, orderHistory,cancelOrder } = require("../controller/profileController")
-const { loadCheckOut, placeOrder,orderStatus,razorPay,addingCoupon,loadInvoice } = require("../controller/chechOutController")
+const { loadCheckOut, placeOrder,orderStatus,razorPay,addingCoupon,loadInvoice,walletPayment } = require("../controller/chechOutController")
 
 
 const {imageCrop}= require("../middleware/crop")
@@ -40,6 +40,9 @@ router.get("/repassword", isLogged, resetPassword)
 
 router.get("/shop/:page", loadShop)
 
+router.post("/catagory/:id",loadSearch)
+router.post("/brand/:name",loadBrand)
+
 router.get("/shopdetails/:id/details", loadDetails)
 
 router.get("/cart", isLogedout, loadCart)
@@ -71,6 +74,7 @@ router.post("/createPayment",isLogedout,razorPay)
 router.post("/cancelOrder/:id",isLogedout,cancelOrder)
 
 router.post("/checkOut/:currentAddress/:paymentMethod/placeOrder", isLogedout, placeOrder)
+router.post("/getwallet",isLogedout,walletPayment)
 
 router.get ("/orderStatus/:id",isLogedout,orderStatus)
 
@@ -85,6 +89,8 @@ router.post("/returnOrder/:id",isLogedout,returnOrder)
 router.get("/invoice/:id",isLogedout,loadInvoice)
 
 router.get("/contact",loadContact)
+
+
 
 
 

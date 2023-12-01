@@ -106,43 +106,70 @@
 </section>
 
 <script>
-  function addCart(id) {
-    const flashMessage = document.getElementById('flash-message');
+   const flashMessage = document.getElementById('flash-message');
+
+function addCart(id) {
 
 
-    fetch(`/cart/${id}/passdata`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+  fetch(`/cart/${id}/passdata`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
 
-      })
-      .then(response => {
-        // Check if the request was successful
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        // Parse the JSON data from the response
-        return response.json();
-      })
-      .then(data => {
-                  
-                  console.log("RESSSSSSSSSSSSSS");
-                   flashMessage.textContent = 'Item added to cart!';
-                   flashMessage.style.display = 'block'; // Show the flash message
-                   setTimeout(() => {
-                       flashMessage.style.display = 'none'; // Hide the flash message after a certain duration (in milliseconds)
-                   }, 2000); // 2000ms (2 seconds) in this example, adjust as needed
-                })
+    })
+    // ...
 
-      .catch(error => {
-        // Handle errors that occurred during the fetch
-        console.error('There has been a problem with your fetch operation:', error);
-      });
+    .then(response => {
+      // Check if the request was successful
+      if (!response.ok) {
+
+        throw new Error(response.status === 400 ? 'Insufficient stock.' : 'Network response was not ok');
+      }
+      // Parse the JSON data from the response
+      return response.json();
+    })
+    .then(data => {
+      const cartUpadte = document.getElementById("cartItem");
+
+      console.log("RESSSSSSSSSSSSSS");
+      flashMessage.textContent = 'Item added to cart!';
+      flashMessage.style.display = 'block'; // Show the flash message
+      setTimeout(() => {
+        flashMessage.style.display = 'none'; // Hide the flash message after a certain duration (in milliseconds)
+      }, 2000); // 2000ms (2 seconds) in this example, adjust as needed
+      console.log(data);
+      cartUpadte.innerHTML = data || 0;
+    })
+   .catch(error => {
+console.log(error.message);
+
+// Show SweetAlert with different messages based on error type
+if (error.message.includes('Insufficient stock.')) {
+  Swal.fire({
+    title: 'Error',
+    text: 'Insufficient stock.',
+    icon: 'error',
+    confirmButtonText: 'OK',
+  });
+} else {
+  Swal.fire({
+    title: 'Error',
+    text: 'Please log in to your account.',
+    icon: 'error',
+    confirmButtonText: 'OK',
+  });
+}
+});
+
 
 
   }
+
+
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script type="text/javascript">
   function startZoom(e, containerId) {
     const container = document.querySelector(`[data="${containerId}"]`);

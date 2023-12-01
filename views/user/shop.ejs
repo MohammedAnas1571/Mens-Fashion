@@ -41,7 +41,11 @@
                     <div class="shop__sidebar__categories">
                       <ul class="nice-scroll">
                         <% catagory.forEach(item  => { %>
-                        <li><a href="#"><%= item.categoryName %> </a></li>
+                          <li style="cursor: pointer;font-weight: lighter;" onclick="filter('<%= item._id %>')">
+                            <%= item.categoryName %>
+                          </li>
+                          
+
                         <%  }) %>
                       </ul>
                     </div>
@@ -58,7 +62,8 @@
                       <ul>
                         <% products.forEach(item  => { %>
 
-                        <li><a href="#"><%= item.brand_name %></a></li>
+                          <li style="cursor: pointer;font-weight: lighter;" onclick="find('<%= item.brand_name %>')"><%= item.brand_name %></li>
+
                         <%  }) %>
                       </ul>
                     </div>
@@ -72,7 +77,7 @@
       </div>
       <div class="col-lg-9 mt-0">
         
-        <div class="row">
+        <div class="row" id="filter">
 
 
 
@@ -87,15 +92,8 @@
                   <div class="ribbon"><span> Flat <%= product.offer %>%</span></div>
                   <% } %>
                   <img src="data:<%= product.images[0].contentType %>;base64,<%= product.images[0].data.toString('base64') %>" alt="">
-                  <% if (index < 3) { %>
-                  <span class="label">New</span>
-                  <% } %>
-                  <ul class="product__hover">
-
-                    <br><br><br><br><br>
-                    <li><a href="#"><img src="/user/img/icon/heart.png" alt=""></a></li>
-
-                  </ul>
+               
+               
               </div>
               <div class="product__item__text">
                 <h5 class="fw-bold">
@@ -103,13 +101,7 @@
                 </h5>
 
 
-                <div class="rating">
-                  <i class="fa fa-star"></i>
-                  <i class="fa fa-star"></i>
-                  <i class="fa fa-star"></i>
-                  <i class="fa fa-star"></i>
-                  <i class="fa fa-star-o"></i>
-                </div>
+               
                 <h5> &#8377;<%= product.price %>
                 </h5>
                 <div class="product__color__select">
@@ -170,7 +162,169 @@
   </div>
 </section>
 <!-- Shop Section End -->
+<script>
+  function filter(id){
+    console.log(id);
+    fetch(`/catagory/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
 
+      })
+      // ...
+
+      .then(response => {
+        // Check if the request was successful
+        if (!response.ok) {
+
+          throw new Error(response.status === 400 ? 'Insufficient stock.' : 'Network response was not ok');
+        }
+        // Parse the JSON data from the response
+        return response.json();
+      })
+      .then(data => {
+     const filter =  document.getElementById("filter")
+     filter.innerHTML=""
+     console.log(data.products);
+     if(data.products.length){
+       data.products.forEach(product => {
+        const div = document.createElement("div")
+        const imageSrc = URL.createObjectURL(new Blob([new Uint8Array(product.images[0].data.data)], { type: product.images[0].contentType }));
+        div.classList.add("col-lg-4", "col-md-6" ,"col-sm-6")
+        div.innerHTML=`
+        <div class="product__item sale">
+                <div class="product__item__pic set-bg">
+                  <a href="/shopdetails/${ product._id }/details">
+                    
+                    <img src="${imageSrc}" alt="">
+  
+                 
+                 
+                </div>
+                <div class="product__item__text">
+                  <h5 class="fw-bold">
+                    ${product.product_name}
+                  </h5>
+  
+  
+                 
+                  <h5> &#8377;${ product.price }
+                  </h5>
+                  <div class="product__color__select">
+                    <label for="pc-7">
+                      <input type="radio" id="pc-7">
+                    </label>
+                    <label class="active black" for="pc-8">
+                      <input type="radio" id="pc-8">
+                    </label>
+                    <label class="grey" for="pc-9">
+                      <input type="radio" id="pc-9">
+                    </label>
+  
+  
+                  </div>
+                  <br>
+                  <div class="flash-message" id="flash-message">
+                    Item added to cart!
+                  </div>
+  
+                </div>
+              
+              </div>
+        `
+        filter.appendChild(div)
+        
+       });
+
+     }else{
+      filter.innerHTML="<h3 >Not found </h3>"
+     }
+  })
+}
+
+function find(name){
+  fetch(`/brand/${name}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+      })
+      // ...
+
+      .then(response => {
+        // Check if the request was successful
+        if (!response.ok) {
+
+          throw new Error(response.status === 400 ? 'Insufficient stock.' : 'Network response was not ok');
+        }
+        // Parse the JSON data from the response
+        return response.json();
+      })
+      .then(data => {
+     const filter =  document.getElementById("filter")
+     filter.innerHTML=""
+     console.log(data.products);
+     if(data.products.length){
+       data.products.forEach(product => {
+        const div = document.createElement("div")
+        const imageSrc = URL.createObjectURL(new Blob([new Uint8Array(product.images[0].data.data)], { type: product.images[0].contentType }));
+        div.classList.add("col-lg-4", "col-md-6" ,"col-sm-6")
+        div.innerHTML=`
+        <div class="product__item sale">
+                <div class="product__item__pic set-bg">
+                  <a href="/shopdetails/${ product._id }/details">
+                    
+                    <img src="${imageSrc}" alt="">
+  
+                 
+                 
+                </div>
+                <div class="product__item__text">
+                  <h5 class="fw-bold">
+                    ${product.product_name}
+                  </h5>
+  
+  
+                 
+                  <h5> &#8377;${ product.price }
+                  </h5>
+                  <div class="product__color__select">
+                    <label for="pc-7">
+                      <input type="radio" id="pc-7">
+                    </label>
+                    <label class="active black" for="pc-8">
+                      <input type="radio" id="pc-8">
+                    </label>
+                    <label class="grey" for="pc-9">
+                      <input type="radio" id="pc-9">
+                    </label>
+  
+  
+                  </div>
+                  <br>
+                  <div class="flash-message" id="flash-message">
+                    Item added to cart!
+                  </div>
+  
+                </div>
+              
+              </div>
+        `
+        filter.appendChild(div)
+        
+       });
+
+     }else{
+      filter.innerHTML="<h3 >Not found </h3>"
+     }
+  })
+}
+
+
+
+</script>
 <script>
   const flashMessage = document.getElementById('flash-message');
 
@@ -232,7 +386,7 @@
 
     }
  
-
+  
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

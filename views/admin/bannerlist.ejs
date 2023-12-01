@@ -9,8 +9,8 @@
         <div class="col-lg-12 grid-margin stretch-card">
           <div class="card">
             <div class="card-body">
-              <h4 class="card-title">Products List</h4>
-              <a href="/admin/addproduct">Add Product</a>
+              <h4 class="card-title">Banner List</h4>
+              <a href="/admin/banner">Add Banner</a>
              
 
               <div class="table-responsive">
@@ -20,69 +20,57 @@
                     <tr>
                       <th>Sl No</th>
                       <th>Images</th>
-                      <th>Name</th>
-                      <th>Brand</th>
-                      <th>Category</th>
-                      <th>Price(MRP)</th>
-                      <th>OfferPrice %</th>
+                      <th>Title</th>
+                      <th>Sub title</th>
+                      <th>Description</th>
                       
-                      <th>Stock</th>
-                      <th>Color</th>
                       <th>Status</th>
                       <th>Action</th>
 
                     </tr>
                   </thead>
                   <tbody>
-                    <% products.forEach((product,index )=> { %>
+                    <% banner.forEach((item,index )=> { %>
 
                       <tr>
                         <td>
                           <%= index+1 %>
                         </td>
                         <td>
-                            <% product.images.forEach(image => { %>
+                           
                                  
-                                <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="<%= product.price %>">
-                              <% }) %>
+                                <img src="data:<%= item.image.contentType %>;base64,<%= item.image.data.toString('base64') %>" alt="">
+                          
                         </td>
                         <td>
-                            <%= product.product_name %>
+                            <%= item.title %>
                         </td>
              
-                        <td><%= product.brand_name %></td>
+                        <td><%= item.subTitle %></td>
                         
                         <td>
-                          <% if (product.category) { %>
-                            <%= product.category.categoryName %>
-
-                          <% } else { %>
-                              No Category
-                          <% } %>
+                         <%= item.description %>
                       </td>
                       
                         
-                        <td><%= product.price %></td>
-                        <td><%= product.offer %> %</td>
-                        <td><%= product.stock %></td>
-                        <td><%= product.color %></td>
+                       
                           <!--if User Block then this display -->
                 
-                          <% if (product.is_delete === true) { %>
+                          <% if (item.isBlock === true) { %>
                             <td>
                              <label class="text-danger">Deactive</label>
                            </td>
                             <td>
-                             <a href="/admin/productlist/<%= product._id %>/Edit " class="btn btn-primary">Edit</a>
-                             <a href="/admin/productlist/<%= product._id %>/Active" class="btn btn-success">Active</a>
+                             <a href="/admin/editbanner/<%= item._id %>/Edit " class="btn btn-primary">Edit</a>
+                             <a href="/admin/productlist/<%= item._id %>/Active" class="btn btn-success">Active</a>
                             </td>
                            <%} else {%>
                              <td>
                                <label class="text-success">Active</label>
                              </td>
                               <td>
-                               <a href="/admin/productlist/<%= product._id %>/Edit %>" class="btn btn-primary">Edit</a>
-                               <a href="/admin/productlist/<%= product._id %>/Deactive" class="btn btn-danger">Deactive</a>
+                               <a href="/admin/editbanner/<%= item._id %>/Edit %>" class="btn btn-primary">Edit</a>
+                               <a href="/admin/editbanner/<%= item._id %>/Deactive" class="btn btn-danger">Deactive</a>
                               </td>
                           <% }%>
                            

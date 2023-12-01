@@ -4,7 +4,8 @@ const mongoose = require("mongoose")
 const productCategrySchema = new mongoose.Schema({
     categoryName:{
         type:String,
-        require:true
+        require:true,
+        unique: true,
     },
     description:{
         type:String,
@@ -13,6 +14,10 @@ const productCategrySchema = new mongoose.Schema({
     image:{
         data:Buffer,
         contentType:String
+    },
+    isBlock :{
+        type:Boolean,
+        default:false
     }
 })
 const productCategry = mongoose.model(

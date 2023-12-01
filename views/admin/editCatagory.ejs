@@ -7,7 +7,7 @@
         <div class="card">
 
           <div class="card-body">
-            <h4 class="card-title">Add Category</h4>
+            <h4 class="card-title">Edit Category</h4>
             <a href="/admin/Category-management">Back to Category</a>
             </p>
           </div>
@@ -21,21 +21,35 @@
       <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
           <div class="card-body">
-            <form id="catagoryForm" action="/admin/addcatagory" method="post" enctype="multipart/form-data">
+            <form id="catagoryForm" action="/admin/editCatagory" method="post" enctype="multipart/form-data">
+              <input type="hidden" value="<%= catagory._id %>" name="id">
               <div class="form-group">
+
                 <label>images upload :</label>
                 <div class="input-group col-xs-12">
-                  <input type="file" id="image" name="image" class="form-control file-upload-info">
+                  <input type="file" id="image" name="image"  class="form-control file-upload-info">
+
 
                 
 
                 </div>
                 <div id="imageError" style="color: red;"></div>
               </div>
+              <div style="position: relative;">
+                <input type="hidden" id="imagePresent" name="imagePresent" value="<%= catagory.image ? 'true' : 'false' %>">
+                <!-- Display the image -->
+                <img
+                    src="data:<%= catagory.image.contentType %>;base64,<%=catagory.image.data.toString('base64') %>"
+                    alt="<%= catagory.product_name %>"
+                    style="width: 180px;height: 180px;">
+
+                <!-- Add a "Delete" button (X button) -->
+              
+            </div>
 
               <div class="form-group">
                 <label for="exampleInputCity1">Category Name :</label>
-                <input type="text" class="form-control" name="name" id="catagoryName" placeholder="Category name" >
+                <input type="text" class="form-control" name="catagoryName"id="catagoryName" value="<%= catagory.categoryName %>" placeholder="Category name" >
                 <div id="CategoryNameError" style="color: red;"></div>
 
               </div>
@@ -47,12 +61,12 @@
 
               <div class="form-group">
                 <label for="exampleInputCity1">Description : </label>
-                <input type="text" class="form-control" name="description" id="description" placeholder="enter description" >
+                <input type="text" class="form-control" name="description" id="description" value="<%=catagory.description %>" placeholder="enter description" >
                 <div id="descriptionError" style="color: red;"></div>
 
               </div>
 
-              <button type="submit" class="btn btn-primary mb-4">Add</button>
+              <button type="submit" class="btn btn-primary mb-4">Submit</button>
 
           </div>
           </form>
@@ -72,25 +86,30 @@
 
   const imageInput = document.getElementById("image");
   const imageError = document.getElementById("imageError");
+  const imagePresentInput = document.getElementById("imagePresent");
 
 
+ 
   function imageValidation() {
-  if (imageInput.value.trim() === "") {
-    imageError.innerHTML = "Please upload Image!";
-    return false;
-  } 
-     const selectedFiles = imageInput.files;
+    const isImagePresent = imagePresentInput.value === 'true';
 
-if (selectedFiles.length !== 1) {
-  imageError.innerHTML = "Please upload exactly one image!";
-  return false;
-}
-  
-  else {
+    if (!isImagePresent && imageInput.value.trim() === "") {
+      imageError.innerHTML = "Please upload Image!";
+      return false;
+    }
+
+    const selectedFiles = imageInput.files;
+
+    if (!isImagePresent && selectedFiles.length !== 1) {
+      imageError.innerHTML = "Please upload exactly one image!";
+      return false;
+    }
+
     imageError.innerHTML = "";
     return true;
   }
-}
+
+
 
 function nameValidation() {
   if (nameInput.value.trim() === "") {
@@ -115,7 +134,7 @@ function descriptionValidation() {
   couponForm.addEventListener("submit", function(event) {
     event.preventDefault();
     const validations = [
-      imageValidation(), nameValidation(),
+    imageValidation(), nameValidation(),
       descriptionValidation()
       // Add this line
     ];

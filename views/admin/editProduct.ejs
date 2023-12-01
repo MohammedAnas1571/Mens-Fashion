@@ -1,201 +1,346 @@
 <%- include("../partials/admin/header") %>
 <div class="main-panel">
-    <div class="content-wrapper">
-        <div class="page-header">
-            <h3 class="page-title">Product Details</h3>
-        </div>
-        <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Product Information</h4>
-                        <p class="card-description text-info">Basic product info</p>
-                        <form action="/admin/productlist/Edit" method="post" class="forms-sample"
-                            enctype="multipart/form-data">
-                            <input type="hidden" value="<%= id %>" name="id">
-                            <% if (message !== "" ) { %>
-                                <p class="text-danger">
-                                    <%= message %>
-                                </p>
-                            <% } %>
-
-                            <!-- Product Name -->
-                            <div class="form-group">
-                                <label for="productName">Product Name</label>
-                                <input type="text" class="form-control text-black" value="<%= product.product_name %>"
-                                    name="productName" id="productName" placeholder="Name">
-                            </div>
-
-                            <!-- Brand Name -->
-                            <div class="form-group">
-                                <label for="brandName">Brand Name</label>
-                                <input type="text" class="form-control text-black" value="<%= product.brand_name %>"
-                                    name="brandName" id="brandName" placeholder="Brand Name">
-                            </div>
-
-                            <!-- Price -->
-                            <div class="form-group">
-                                <label for="price">Price</label>
-                                <input type="number" class="form-control text-black" value="<%= product.price %>"
-                                    name="price" id="price" placeholder="Price">
-                            </div>
-
-                            <!-- Offer % -->
-                            <div class="form-group">
-                                <label for="offer">Offer %</label>
-                                <input type="text" class="form-control text-black" name="offer"
-                                    value="<%= product.offer %>" id="offer" placeholder="Offer Price %">
-                            </div>
-
-                            <!-- Stock Count -->
-                            <div class="form-group">
-                                <label for="stockCount">Stock Count</label>
-                                <input type="number" class="form-control text-black" value="<%= product.stock %>"
-                                    name="stock" id="stockCount" placeholder="Count">
-                            </div>
-
-                            <!-- Description -->
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea class="text-black form-control" id="description"
-                                    name="description" rows="8"
-                                    placeholder="Write about the Product"><%= product.description %></textarea>
-                            </div>
-
-                            <!-- Product Categories and Tags -->
-                            <div class="col-md-12 grid-margin stretch-card">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h4 class="card-title">Product Categories and Tags</h4>
-                                        <div class="form-group">
-                                            <label for="category">Category</label>
-                                            <select class="form-control form-control-lg text-black" name="category"
-                                                id="category">
-                                                <option><%= product.category %></option>
-                                                <% Categories.forEach(category => { %>
-                                                    <option><%= category.categoryName %></option>
-                                                <% }) %>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Images Upload -->
-                            <div class="form-group">
-                                <label>Images Upload (Required: 3)</label>
-                                <div class="input-group col-md-12">
-                                    <% product.images.forEach(image => { %>
-                                        <div style="position: relative;">
-                                            <!-- Display the image -->
-                                            <img
-                                                src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>"
-                                                alt="<%= product.product_name %>"
-                                                style="width: 180px;height: 180px;">
-
-                                            <!-- Add a "Delete" button (X button) -->
-                                            <a class="btn btn-danger btn-delete-image" href="/admin/productlist/<%= image._id %>/<%= id %>/deleteImg">X</a>
-                                        </div>
-                                    <% }) %>
-                                </div>
-                                <br><br>
-                                <div>
-                                    <input type="file" id="images" name="images"
-                                        multiple class="form-control file-upload-info"
-                                        onchange="previewImages(event)">
-                                </div>
-                                <div class="preview-container" id="preview-container">
-                                    <!-- Image previews will be added here dynamically -->
-                                </div>
-                            </div>
-
-                            <!-- Color -->
-                            <div class="form-group">
-                                <label for="color">Color</label>
-                                <select class="form-control text-black" name="color" id="color">
-                                    <option selected disabled><%= product.color %></option>
-                                    <option>White</option>
-                                    <option>Black</option>
-                                    <option>Blue</option>
-                                    <option>Silver</option>
-                                    <option>Gold</option>
-                                    <option>Red</option>
-                                    <option>Gray</option>
-                                    <option>Yellow</option>
-                                    <option>Pink</option>
-                                </select>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn btn-primary mb-2">Submit</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="content-wrapper">
+    <div class="page-header">
+      <h3 class="page-title">Product Details</h3>
     </div>
+    <div class="row">
+      <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title">Product Information</h4>
+            <p class="card-description text-info">Basic product info</p>
+            <form id="productForm" action="/admin/productlist/Edit" method="post" class="forms-sample" enctype="multipart/form-data">
+              <input type="hidden" value="<%= id %>" name="id">
+              <% if (message !== "" ) { %>
+              <p class="text-danger">
+                <%= message %>
+              </p>
+              <% } %>
+
+              <!-- Product Name -->
+              <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input type="text" class="form-control text-black" value="<%= product.product_name %>" name="productName" id="productName" placeholder="Name">
+                <div id="NameError" style="color: red;"></div>
+              </div>
+
+              <!-- Brand Name -->
+              <div class="form-group">
+                <label for="brandName">Brand Name</label>
+                <input type="text" class="form-control text-black" value="<%= product.brand_name %>" name="brandName" id="brandName" placeholder="Brand Name">
+                <div id="brandNameError" style="color: red;"></div>
+              </div>
+
+              <!-- Price -->
+              <div class="form-group">
+                <label for="price">Price</label>
+
+                <input type="number" class="form-control text-black" value="<%= product.price %>" name="price" id="price" placeholder="Price">
+                <div id="priceError" style="color: red;"></div>
+              </div>
+
+              <!-- Offer % -->
+              <div class="form-group">
+                <label for="offer">Offer %</label>
+                <input type="text" class="form-control text-black" name="offer" value="<%= product.offer %>" id="offer" placeholder="Offer Price %">
+                <div id="offerError" style="color: red;"></div>
+              </div>
+
+              <!-- Stock Count -->
+              <div class="form-group">
+                <label for="stockCount">Stock Count</label>
+                <input type="number" class="form-control text-black" value="<%= product.stock %>" name="stock" id="stockCount" placeholder="Count">
+                <div id="stockError" style="color: red;"></div>
+              </div>
+
+              <!-- Description -->
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="text-black form-control" id="description" name="description" rows="8" placeholder="Write about the Product"><%= product.description %></textarea>
+                <div id="descriptionError" style="color: red;"></div>
+              </div>
+
+              <!-- Product Categories and Tags -->
+              <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Product Categories and Tags</h4>
+                    <div class="form-group">
+                      <label for="category">Category</label>
+                      <select class="form-control form-control-lg text-black" name="category" id="category">
+                        <option><%= product.category.categoryName %></option>
+                        <% Categories.forEach(category => { %>
+                        <% if (category.isBlock===false) { %>
+                        <option><%= category.categoryName %></option>
+                        <% } %>
+                        <% }) %>
+                      </select>
+                      <div id="categoryError" style="color: red;"></div> <!-- Move this line outside of the loop -->
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Images Upload -->
+              <div class="form-group">
+                <label>Images Upload (Required: 3)</label>
+                <div class="input-group col-md-12">
+                  <% product.images.forEach(image => { %>
+                  <div style="position: relative;">
+                    <!-- Display the image -->
+                    <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="<%= product.product_name %>" style="width: 180px;height: 180px;">
+
+                    <!-- Add a "Delete" button (X button) -->
+                    <a class="btn btn-danger btn-delete-image" href="/admin/productlist/<%= image._id %>/<%= id %>/deleteImg">X</a>
+                  </div>
+                  <% }) %>
+                </div>
+                <br><br>
+                <div>
+                  <input type="file" id="images" name="images" multiple class="form-control file-upload-info" onchange="previewImages(event)">
+                  <div id="imageError" style="color: red;"></div>
+                </div>
+                <div class="preview-container" id="preview-container">
+                  <!-- Image previews will be added here dynamically -->
+                </div>
+              </div>
+
+              <!-- Color -->
+              <div class="form-group">
+                <label for="color">Color</label>
+                <select class="form-control text-black" name="color" id="color">
+                  <option selected disabled><%= product.color %></option>
+                  <option>White</option>
+                  <option>Black</option>
+                  <option>Blue</option>
+                  <option>Silver</option>
+                  <option>Gold</option>
+                  <option>Red</option>
+                  <option>Gray</option>
+                  <option>Yellow</option>
+                  <option>Pink</option>
+                </select>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-primary mb-2">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    function previewImages(event) {
-        var previewContainer = document.getElementById('preview-container');
-        previewContainer.innerHTML = '';
+  const couponForm = document.getElementById("productForm");
+  const nameInput = document.getElementById("productName");
+  const nameError = document.getElementById("NameError");
 
-        var files = event.target.files;
+  const brandInput = document.getElementById("brandName");
+  const brandError = document.getElementById("brandNameError");
 
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
+  const priceInput = document.getElementById("price");
+  const priceError = document.getElementById("priceError");
 
-            if (file.type.startsWith('image/')) {
-                var reader = new FileReader();
+  const offerInput = document.getElementById("offer");
+  const offerError = document.getElementById("offerError");
 
-                reader.onload = function (e) {
-                    var previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
+  const stockInput = document.getElementById("stockCount");
+  const stockError = document.getElementById("stockError");
 
-                    var img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '100px'; // Set your desired width
+  const descriptionInput = document.getElementById("description");
+  const descriptionError = document.getElementById("descriptionError");
 
-                    var deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'btn btn-danger btn-delete-image';
-                    deleteBtn.innerHTML = 'X';
-                    deleteBtn.onclick = function () {
-                        previewContainer.removeChild(previewItem);
-                    };
+  const categoryInput = document.getElementById("category");
+  const categoryError = document.getElementById("categoryError");
 
-                    previewItem.appendChild(img);
-                    previewItem.appendChild(deleteBtn);
-                    previewContainer.appendChild(previewItem);
-                };
 
-                reader.readAsDataURL(file);
-            }
-        }
+
+  
+  const imagesInput = document.getElementById("images");
+  const imagesError = document.getElementById('imageError');
+
+
+
+
+
+
+
+
+
+  function validateName() {
+    if (nameInput.value.trim() === "") {
+      nameError.innerHTML = "Please enter a Product Name!";
+      return false;
+    } else {
+      nameError.innerHTML = "";
+      return true;
+    }
+  }
+
+  function brandNameValidation() {
+    if (brandInput.value.trim() === "") {
+      brandError.innerHTML = "Please enter a Brand Name!";
+      return false;
+    } else {
+      brandError.innerHTML = "";
+      return true;
+    }
+  }
+
+  function validatePrice() {
+    const priceValue = priceInput.value.trim();
+
+    if (priceValue === "") {
+      priceError.innerHTML = "Please enter a price!";
+      return false;
+    }
+    if (!/^\d+(\.\d{1,2})?$/.test(priceValue) || parseFloat(priceValue) < 0) {
+      priceError.innerHTML = "Please enter a valid price greater than or equal to 0!";
+      return false;
+    }
+    priceError.innerHTML = "";
+    return true;
+
+  }
+
+  function validateOffer() {
+    const offerValue = offerInput.value.trim();
+
+    if (offerValue === "") {
+      offerError.innerHTML = "Please enter an offer price!";
+      return false;
     }
 
-    function deleteImage(imageId) {
-        // Perform the necessary logic to delete the image on the server
-        // You can make an AJAX request to the server to handle the deletion
-        console.log('Deleting image with ID:', imageId);
+    const offerNumber = parseFloat(offerValue);
+
+    // Check if the offer is a valid number and not less than 0
+    if (isNaN(offerNumber) || offerNumber < 0) {
+      offerError.innerHTML = "Please enter a valid offer price greater than or equal to 0!";
+      return false;
     }
+
+    // Check if the offer is greater than 100%
+    if (offerNumber > 100) {
+      offerError.innerHTML = "Offer cannot be more than 100%";
+      return false;
+    }
+
+    offerError.innerHTML = "";
+    return true;
+  }
+
+  function validateStock() {
+    const stockValue = stockInput.value.trim();
+
+    if (stockValue === "") {
+      stockError.innerHTML = "Please enter a stock count!";
+      return false;
+    }
+
+    const stockNumber = parseInt(stockValue);
+
+    // Check if the stock is a valid number and greater than 0
+    if (isNaN(stockNumber) || stockNumber <= 0) {
+      stockError.innerHTML = "Please enter a valid stock count greater than 0!";
+      return false;
+    }
+
+    stockError.innerHTML = "";
+    return true;
+  }
+
+  function validateDescription() {
+    const descriptionValue = descriptionInput.value.trim();
+
+    if (descriptionValue === "") {
+      descriptionError.innerHTML = "Please enter a description!";
+      return false;
+    }
+
+    descriptionError.innerHTML = "";
+    return true;
+  }
+
+  function validateCategory() {
+    const selectedCategory = categoryInput.value.trim();
+
+    if (selectedCategory === "") {
+      categoryError.innerHTML = "Please select a category!";
+      return false;
+    }
+
+    categoryError.innerHTML = "";
+    return true;
+  }
+
+  
+  
+
+
+    
+
+  couponForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+    const validations = [
+   validateCategory(), validateDescription(), validateStock(), validateOffer(), validatePrice(),
+      brandNameValidation(), validateName()
+    ];
+    const hasErrors = validations.some(validation => validation === false);
+    if (!hasErrors) {
+      couponForm.submit(); // Trigger the form submission
+    }
+  });
+
+
+  function previewImages(event) {
+    var previewContainer = document.getElementById('preview-container');
+    previewContainer.innerHTML = '';
+
+    var files = event.target.files;
+
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+
+      if (file.type.startsWith('image/')) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var previewItem = document.createElement('div');
+          previewItem.className = 'preview-item';
+
+          var img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100px'; // Set your desired width
+
+          previewItem.appendChild(img);
+          previewContainer.appendChild(previewItem);
+        };
+
+        reader.readAsDataURL(file);
+      }
+    }
+  }
 </script>
 
 <style>
-    .preview-container {
-        display: flex;
-        flex-wrap: wrap;
-    }
+  .preview-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
 
-    .preview-item {
-        margin: 10px;
-        position: relative;
-    }
+  .preview-item {
+    margin: 10px;
+    position: relative;
+  }
 
-    .btn-delete-image {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        cursor: pointer;
-    }
+  .btn-delete-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+  }
 </style>
