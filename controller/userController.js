@@ -155,7 +155,8 @@ const userRegisterSave = async (req, res) => {
             res.render("user/register", { message: "your registration has been failed." })
 
         }
-    } catch {
+    } catch (error){
+        console.log(error.message);
         res.render("user/500")
     }
 

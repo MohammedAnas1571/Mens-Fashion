@@ -47,7 +47,8 @@ const adminlogin = async (req, res) => {
             req.session.admin = admin._id;
             return res.redirect('/admin/dashboard');
         }
-    } catch {
+    } catch(error) {
+        console.log(error)
         res.render("admin/500")
 
     };
@@ -306,7 +307,7 @@ const createProduct = async (req, res) => {
 
         if (product) {
             console.log("Product added successfully.");
-            return res.redirect("/admin/productlist")
+            return res.redirect("/admin/productist")
         }
 
     } catch(error){
@@ -319,7 +320,7 @@ const loadProductPage = async (req, res) => {
     try {
         const products = await Product.find().populate("category")
         if (products) {
-            return res.render('admin/productlist', { products })
+            return res.render('admin/productList', { products })
         } else {
             console.log("products not get");
         }

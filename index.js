@@ -1,4 +1,4 @@
-require("dotenv").config();
+const dotenv = require("dotenv")
 const express = require("express");
 const userRouter = require("./router/userRouter")
 const adminRouter = require("./router/adminRouter")
@@ -8,20 +8,24 @@ const nocache = require("nocache");
 const cookie = require("cookie-parser");
 const morgan = require("morgan")
 const mongoose = require ("mongoose")
+const path = require('path')
 
-
+dotenv.config({path:"./config.env"})
 
 
 
 const app = express();
-// Set EJS as the view engine
 app.set('view engine', 'ejs');
+
+// Set EJS as the view engine
+app.set('views',path.join(__dirname,'views'));
 
 app.use(morgan('tiny'));
 
 
-app.use(express.static('public'));
 
+app.use(express.static(path.join(__dirname,'public')));
+  console.log(process.env.MONGO_URL)
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json());
@@ -52,5 +56,5 @@ app.all("/*",(req,res)=>res.render("404"))
 
 
   const port = process.env.PORT
-
+  console.log(process.env.MONGO_URL)
 app.listen(port, () => { console.log("server is running ") })

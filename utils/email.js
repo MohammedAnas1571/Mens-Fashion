@@ -2,10 +2,12 @@ const randomString = require("randomstring")
 const nodeMailer = require("nodemailer")
 const UserOTPVerification = require("../model/userOTPverification")
 const {securepassword} = require("../utils/passwordHash")
+const dotenv = require("dotenv")
+dotenv.config({path:"./config.env"})
 
 //send email models
 let transporter = nodeMailer.createTransport({
-    service: "Gmail",
+    service: "gmail",
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
@@ -38,7 +40,7 @@ const sendOTPVerificationEmail = async ({ _id, email,userName },res) => {
            <p> Best regards</p> `
         }    
 
-        // Hash the OTP
+        console.log(process.env.PASSWORD,process.env.EMAIL);
         const hasedOtp = await securepassword(otp)
         const newOTPVerification = new UserOTPVerification({
             userId: _id,
@@ -46,19 +48,22 @@ const sendOTPVerificationEmail = async ({ _id, email,userName },res) => {
             otp: hasedOtp,
            
         });
+       
                 // Save OTP record
         await UserOTPVerification.deleteMany({ userId: _id})
         
 
         await newOTPVerification.save();
+  
 
         // Send email
-        await transporter.sendMail(mailOption);
+         await transporter.sendMail(mailOption);
         
-
+         console.log(value);
         res.redirect(`/otp/?userId=${_id}`)
 
-    } catch {
+    } catch (error){
+        console.log(error.message);
       res.render("user/500")
         
     }
